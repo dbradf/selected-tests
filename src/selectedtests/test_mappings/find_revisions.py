@@ -2,12 +2,13 @@ from datetime import datetime, timedelta
 from typing import Dict
 
 from evergreen.api import EvergreenApi
+from evergreen.version import Version
 from structlog import get_logger
 
 LOGGER = get_logger(__name__)
 
 
-def _add_project_revision_for_version(version, project_revisions_to_analyze):
+def _add_project_revision_for_version(version: Version, project_revisions_to_analyze: list):
     """
     Build a dictionary of tasks that flipped for builds in this version.
 
@@ -17,7 +18,7 @@ def _add_project_revision_for_version(version, project_revisions_to_analyze):
     project_revisions_to_analyze.append(version.revision)
 
 
-def _add_module_revision_for_version(version, module_repo, module_revisions_to_analyze):
+def _add_module_revision_for_version(version: Version, module_repo: str, module_revisions_to_analyze: list):
     """
     Build a dictionary of tasks that flipped for builds in this version.
 

@@ -25,7 +25,7 @@ def _setup_logging(verbose: bool):
 @click.group()
 @click.option("--verbose", is_flag=True, default=False, help="Enable verbose logging.")
 @click.pass_context
-def cli(ctx, verbose):
+def cli(ctx, verbose: str):
     ctx.ensure_object(dict)
     ctx.obj["evg_api"] = CachedEvergreenApi.get_api(use_config_file=True)
 
@@ -40,7 +40,7 @@ def cli(ctx, verbose):
 @click.option(
     "--module-repo", type=str, default="", help="Evergreen project's module to analyze."
 )
-def find_mappings(ctx, project, module_repo=""):
+def find_mappings(ctx, project: str, module_repo: str):
     evg_api = ctx.obj["evg_api"]
 
     LOGGER.debug("calling find_flips", project=project, evg_api=evg_api)
