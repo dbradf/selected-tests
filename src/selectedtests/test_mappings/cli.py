@@ -6,7 +6,7 @@ import click
 import structlog
 from evergreen.api import CachedEvergreenApi
 
-from evgflip.find_flips import find
+from selectedtests.test_mappings.find_flips import find
 
 LOGGER = structlog.get_logger(__name__)
 
@@ -32,6 +32,7 @@ def _setup_logging(verbose: bool):
 def cli(ctx, verbose):
     ctx.ensure_object(dict)
     ctx.obj['evg_api'] = CachedEvergreenApi.get_api(use_config_file=True)
+    print("cli")
 
     _setup_logging(verbose)
 
@@ -47,11 +48,12 @@ def find_flips(ctx, project, days_back, n_threads):
     start_date = datetime.combine(datetime.now() - timedelta(days=days_back), time())
 
     LOGGER.debug("calling find_flips", project=project, start_date=start_date, evg_api=evg_api)
-    commits_flipped = find(project, start_date, evg_api, n_threads)
+    commits_flipped = find(project, evg_api)
 
     print(json.dumps(commits_flipped, indent=4))
 
 
 def main():
+    print("main")
     """Entry point into commandline."""
     return cli(obj={})

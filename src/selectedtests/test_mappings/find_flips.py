@@ -1,6 +1,5 @@
 from collections import namedtuple
-from concurrent.futures import ThreadPoolExecutor as Executor
-from datetime import datetime
+from datetime import datetime, timedelta
 from typing import Dict, List
 
 from boltons.iterutils import windowed_iter
@@ -121,8 +120,7 @@ def _flips_for_version(work_item: WorkItem):
     return FlipList(version.revision, _filter_empty_values(flipped_tasks))
 
 
-def find(project: str, look_back: datetime, evg_api: EvergreenApi,
-         n_threads: int = DEFAULT_THREADS) -> Dict:
+def find(project: str, evg_api: EvergreenApi) -> Dict:
     """
     Find test flips in the evergreen project.
 
@@ -132,21 +130,19 @@ def find(project: str, look_back: datetime, evg_api: EvergreenApi,
     :param n_threads: Number of threads to use.
     :return: Dictionary of commits that introduced task flips.
     """
+    results = {}
     LOGGER.debug("Starting find_flips iteration")
     version_iterator = evg_api.versions_by_project(project)
 
-    with Executor(max_workers=n_threads) as exe:
-        jobs = []
-        for next_version, version, prev_version in windowed_iter(version_iterator, 3):
-            log = LOGGER.bind(version=version.version_id)
-            log.debug("Starting to look")
-            if version.create_time < look_back:
-                log.debug("done", create_time=version.create_time)
-                break
+    for next_version, version, prev_version in windowed_iter(version_iterator, 3):
+        log = LOGGER.bind(version=version.version_id)
+        log.debug("Starting to look")
+        if version.create_time < (datetime.now() - timedelta(days=2)):
+            log.debug("done", create_time=version.create_time)
+            break
 
-            work_item = WorkItem(version, next_version, prev_version)
-            jobs.append(exe.submit(_flips_for_version, work_item))
+        work_item = WorkItem(version, next_version, prev_version)
+        result = _flips_for_version(work_item)
+        results[result['revision']] = result['fipped_tasks']
 
-        results = [job.result() for job in jobs]
-
-    return {r.revision: r.flipped_tasks for r in results if r.flipped_tasks}
+    return results
