@@ -34,14 +34,13 @@ def cli(ctx, verbose):
 
 @cli.command()
 @click.pass_context
-@click.option(
-    "--project", type=str, required=True, help="Evergreen project to analyze."
-)
-def find_mappings(ctx, project):
+@click.option("--project", type=str, required=True, help="Evergreen project to analyze.")
+@click.option("--module", type=str, required=True, help="Evergreen project's module to analyze.")
+def find_mappings(ctx, project, module):
     evg_api = ctx.obj["evg_api"]
 
     LOGGER.debug("calling find_flips", project=project, evg_api=evg_api)
-    commits_flipped = add_revisions_for_project(project, evg_api)
+    commits_flipped = add_revisions_for_project(project, module, evg_api)
 
     print(json.dumps(commits_flipped, indent=4))
 
