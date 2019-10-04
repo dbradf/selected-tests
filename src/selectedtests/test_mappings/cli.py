@@ -1,12 +1,18 @@
 import json
 import logging
 from datetime import datetime, time, timedelta
+from git import Repo
+import pdb
+import re
+import os.path
 
 import click
 import structlog
+from evergreen.api import EvergreenApi
 from evergreen.api import CachedEvergreenApi
 
 from selectedtests.test_mappings.find_revisions import add_revisions_for_project
+from selectedtests.test_mappings.heatmap import Heatmap
 
 LOGGER = structlog.get_logger(__name__)
 
@@ -20,6 +26,34 @@ def _setup_logging(verbose: bool):
     logging.basicConfig(level=level)
     for external_lib in EXTERNAL_LIBRARIES:
         logging.getLogger(external_lib).setLevel(logging.WARNING)
+
+
+#  def _repo_for_module(evg_api: EvergreenApi, project: str, module_repo: str):
+    #  pdb.set_trace()
+    #  most_recent_project_version = evg_api.recent_version_by_project(project)[0]
+    #  modules = most_recent_project_version.get_manifest().modules
+    #  for module in modules:
+        #  if modules[module].repo == module_repo:
+            #  module_repo_url = modules[module].url
+    #  return module_repo_url
+
+
+def _get_module_repo(evg_api: EvergreenApi, project: str, module_repo: str):
+    repo_url = "https://github.com/10gen/mongo-enterprise-modules"
+    repo_dest = "./mongo-enterprise-modules"
+    repo = Repo.clone_from(repo_url, repo_dest)
+    return repo
+
+
+def _get_project_repo(evg_api: EvergreenApi, project: str, module_repo: str):
+    repo_url = "https://github.com/mongodb/mongo"
+    CURRENT_DIRECTORY = os.path.dirname(os.path.abspath(__file__))
+    PROJECT_REPO = os.path.join(CURRENT_DIRECTORY, "mongo")
+    if os.path.exists(PROJECT_REPO):
+        repo = Repo(PROJECT_REPO)
+    else:
+        repo = Repo.clone_from(repo_url, PROJECT_REPO)
+    return repo
 
 
 @click.group()
@@ -44,9 +78,16 @@ def find_mappings(ctx, project: str, module_repo: str):
     evg_api = ctx.obj["evg_api"]
 
     LOGGER.debug("calling find_flips", project=project, evg_api=evg_api)
-    commits_flipped = add_revisions_for_project(evg_api, project, module_repo)
+    revisions_for_project = add_revisions_for_project(evg_api, project, module_repo)
+    #  revisions_for_project = _repo_for_module(evg_api, project, module_repo)
+    repo = _get_project_repo(evg_api, project, module_repo)
+    revisions = revisions_for_project["project_revisions_to_analyze"]
+    source_re = re.compile("^src/mongo")
+    test_re = re.compile("^jstests")
+    heatmap = Heatmap.create_heatmap(repo, revisions, test_re, source_re, None, revisions[3])
 
-    print(json.dumps(commits_flipped, indent=4))
+    #  print(json.dumps(revisions_for_project, indent=4))
+    print(json.dumps(heatmap.get_heatmap(), indent=4))
 
 
 def main():

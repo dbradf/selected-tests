@@ -41,6 +41,7 @@ setup(
         'evergreen.py==0.5.0',
         'flask==1.1.1',
         'flask-restplus==0.13.0',
+        'GitPython==3.0.3',
         'structlog==19.1.0',
     ],
     entry_points={
