@@ -143,6 +143,6 @@ def find(project: str, evg_api: EvergreenApi) -> Dict:
 
         work_item = WorkItem(version, next_version, prev_version)
         result = _flips_for_version(work_item)
-        results[result['revision']] = result['fipped_tasks']
+        results[result.revision] = result.flipped_tasks
 
     return results

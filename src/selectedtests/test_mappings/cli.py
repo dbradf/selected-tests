@@ -10,7 +10,6 @@ from selectedtests.test_mappings.find_flips import find
 
 LOGGER = structlog.get_logger(__name__)
 
-DEFAULT_THREADS = 16
 EXTERNAL_LIBRARIES = [
     "evergreen.api",
     "urllib3"
@@ -32,7 +31,6 @@ def _setup_logging(verbose: bool):
 def cli(ctx, verbose):
     ctx.ensure_object(dict)
     ctx.obj['evg_api'] = CachedEvergreenApi.get_api(use_config_file=True)
-    print("cli")
 
     _setup_logging(verbose)
 
@@ -40,20 +38,15 @@ def cli(ctx, verbose):
 @cli.command()
 @click.pass_context
 @click.option("--project", type=str, required=True, help="Evergreen project to analyze.")
-@click.option("--days-back", type=int, required=True, help="How far back to analyze.")
-@click.option("--n-threads", type=int, default=DEFAULT_THREADS,
-              help="Number of threads to execute with.")
-def find_mappings(ctx, project, days_back, n_threads):
+def find_mappings(ctx, project):
     evg_api = ctx.obj['evg_api']
-    start_date = datetime.combine(datetime.now() - timedelta(days=days_back), time())
 
-    LOGGER.debug("calling find_flips", project=project, start_date=start_date, evg_api=evg_api)
+    LOGGER.debug("calling find_flips", project=project, evg_api=evg_api)
     commits_flipped = find(project, evg_api)
 
     print(json.dumps(commits_flipped, indent=4))
 
 
 def main():
-    print("main")
     """Entry point into commandline."""
     return cli(obj={})
