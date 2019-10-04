@@ -6,14 +6,11 @@ import click
 import structlog
 from evergreen.api import CachedEvergreenApi
 
-from selectedtests.test_mappings.find_flips import find
+from selectedtests.test_mappings.find_revisions import add_revisions_for_project
 
 LOGGER = structlog.get_logger(__name__)
 
-EXTERNAL_LIBRARIES = [
-    "evergreen.api",
-    "urllib3"
-]
+EXTERNAL_LIBRARIES = ["evergreen.api", "urllib3"]
 
 
 def _setup_logging(verbose: bool):
@@ -30,19 +27,21 @@ def _setup_logging(verbose: bool):
 @click.pass_context
 def cli(ctx, verbose):
     ctx.ensure_object(dict)
-    ctx.obj['evg_api'] = CachedEvergreenApi.get_api(use_config_file=True)
+    ctx.obj["evg_api"] = CachedEvergreenApi.get_api(use_config_file=True)
 
     _setup_logging(verbose)
 
 
 @cli.command()
 @click.pass_context
-@click.option("--project", type=str, required=True, help="Evergreen project to analyze.")
+@click.option(
+    "--project", type=str, required=True, help="Evergreen project to analyze."
+)
 def find_mappings(ctx, project):
-    evg_api = ctx.obj['evg_api']
+    evg_api = ctx.obj["evg_api"]
 
     LOGGER.debug("calling find_flips", project=project, evg_api=evg_api)
-    commits_flipped = find(project, evg_api)
+    commits_flipped = add_revisions_for_project(project, evg_api)
 
     print(json.dumps(commits_flipped, indent=4))
 
