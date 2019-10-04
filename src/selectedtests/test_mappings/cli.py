@@ -43,7 +43,7 @@ def cli(ctx, verbose):
 @click.option("--days-back", type=int, required=True, help="How far back to analyze.")
 @click.option("--n-threads", type=int, default=DEFAULT_THREADS,
               help="Number of threads to execute with.")
-def find_flips(ctx, project, days_back, n_threads):
+def find_mappings(ctx, project, days_back, n_threads):
     evg_api = ctx.obj['evg_api']
     start_date = datetime.combine(datetime.now() - timedelta(days=days_back), time())
 
