@@ -100,7 +100,7 @@ def _flips_for_build(build: Build, next_version: Version, prev_version: Version)
     ]
 
 
-def _flips_for_version(work_item: WorkItem):
+def _test_mappings_for_version(work_item: WorkItem):
     """
     Build a dictionary of tasks that flipped for builds in this version.
 
@@ -108,6 +108,7 @@ def _flips_for_version(work_item: WorkItem):
     :return: FlipList of what tasks flipped.
     """
     version = work_item.version
+    print(f'lydia #{version.is_patch()}')
     prev_version = work_item.version_prev
     next_version = work_item.version_next
 
@@ -137,12 +138,12 @@ def find(project: str, evg_api: EvergreenApi) -> Dict:
     for next_version, version, prev_version in windowed_iter(version_iterator, 3):
         log = LOGGER.bind(version=version.version_id)
         log.debug("Starting to look")
-        if version.create_time < (datetime.now() - timedelta(days=2)):
+        if version.create_time < (datetime.now() - timedelta(days=1)):
             log.debug("done", create_time=version.create_time)
             break
 
         work_item = WorkItem(version, next_version, prev_version)
-        result = _flips_for_version(work_item)
+        result = _test_mappings_for_version(work_item)
         results[result.revision] = result.flipped_tasks
 
     return results
