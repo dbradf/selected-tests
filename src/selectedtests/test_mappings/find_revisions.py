@@ -8,7 +8,7 @@ LOGGER = get_logger(__name__)
 
 
 def _add_revisions_for_version(
-    version, module, project_revisions_to_analyze, module_revisions_to_analyze
+    version, module_repo, project_revisions_to_analyze, module_revisions_to_analyze
 ):
     """
     Build a dictionary of tasks that flipped for builds in this version.
@@ -17,14 +17,17 @@ def _add_revisions_for_version(
     :return: RevisionPair of what tasks flipped.
     """
     project_revisions_to_analyze.append(version.revision)
-    module_revision = version.get_manifest().modules[module].revision
+    modules = version.get_manifest().modules
+    for module in modules:
+        if modules[module].repo == module_repo:
+            module_revision = modules[module].revision
     if (
         len(module_revisions_to_analyze) == 0 or module_revisions_to_analyze[-1] != module_revision
     ):
         module_revisions_to_analyze.append(module_revision)
 
 
-def add_revisions_for_project(project: str, module: str, evg_api: EvergreenApi) -> Dict:
+def add_revisions_for_project(project: str, module_repo: str, evg_api: EvergreenApi) -> Dict:
     """
     Find test flips in the evergreen project.
 
@@ -47,7 +50,7 @@ def add_revisions_for_project(project: str, module: str, evg_api: EvergreenApi) 
             break
 
         _add_revisions_for_version(
-            version, module, project_revisions_to_analyze, module_revisions_to_analyze
+            version, module_repo, project_revisions_to_analyze, module_revisions_to_analyze
         )
 
     return {
