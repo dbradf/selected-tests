@@ -37,7 +37,7 @@ def _add_module_revision_for_version(version: Version, module_repo: str, module_
 
 
 def add_revisions_for_project(
-    evg_api: EvergreenApi, project: str, module_repo: str = ""
+        evg_api: EvergreenApi, project: str, start_date: int, module_repo: str = ""
 ) -> Dict:
     """
     Find test flips in the evergreen project.
@@ -55,7 +55,7 @@ def add_revisions_for_project(
 
     for version in version_iterator:
         log = LOGGER.bind(version=version.version_id)
-        if version.create_time < (datetime.now() - timedelta(days=3)):
+        if version.create_time < start_date:
             log.debug("done", create_time=version.create_time)
             break
 

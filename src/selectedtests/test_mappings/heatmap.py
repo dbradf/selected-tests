@@ -10,52 +10,44 @@ LOGGER = structlog.get_logger(__name__)
 
 
 class Heatmap(object):
-    def __init__(self, file_intersection, file_count_map, commit_count, last_commit=None):
+    def __init__(self, file_intersection, file_count_map, commit_count):
         """
         Create a Heatmap object.
 
         :param file_intersection: Map of how files intersect.
         :param file_count_map: Map of how many times files where seen.
         :param commit_count: Number of commits seen.
-        :param last_commit: Last commit looked at.
         """
         self._file_intersection = file_intersection
         self._file_count_map = file_count_map
         self._normalized_map = None
         self.commit_count = commit_count
-        self.last_commit = last_commit
 
     @classmethod
-    def create_heatmap(cls, repo, revisions, test_re, source_re, look_until=None, last_commit=None):
+    def create_heatmap(cls, repo, revisions, test_re, source_re, start_date):
         """
         Create a heatmap for the given repository.
 
         :param repo: Repository to analyze.
         :param test_re: Regular expression to match tests.
         :param source_re: Regular expression to match source.
-        :param look_until: How far back to analyze commits.
-        :param last_commit: Process results until command is seen.
+        :param start_date: How far back to analyze commits.
         :return: Number of commits visited, Heatmap of repo, count file.
         """
         file_intersection = defaultdict(lambda: defaultdict(int))
         file_count = defaultdict(int)
 
-        LOGGER.debug('searching until', ts=look_until, commit=last_commit)
+        LOGGER.debug('searching until', ts=start_date)
         commit_count = 0
-        last_commit = None
         for revision in revisions:
             commit = GitCommit(repo.commit(revision))
             LOGGER.debug('Investigating commit', summary=commit.summary(), ts=commit.commit_time,
                          id=commit.id)
 
-            if look_until and commit.commit_time.timestamp() < look_until.timestamp():
-                break
-
-            if last_commit and commit.id == last_commit:
+            if start_date and commit.commit_time.timestamp() < start_date.timestamp():
                 break
 
             commit_count += 1
-            last_commit = commit.id
 
             tests_changed = set()
             src_changed = set()
@@ -72,7 +64,7 @@ class Heatmap(object):
                 for t in tests_changed:
                     file_intersection[src][t] += 1
 
-        return Heatmap(file_intersection, file_count, commit_count, last_commit)
+        return Heatmap(file_intersection, file_count, commit_count)
 
     def get_heatmap(self, normalize=False):
         """

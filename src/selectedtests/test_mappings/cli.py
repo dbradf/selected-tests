@@ -74,17 +74,19 @@ def cli(ctx, verbose: str):
 @click.option(
     "--module-repo", type=str, default="", help="Evergreen project's module to analyze."
 )
-def find_mappings(ctx, project: str, module_repo: str):
+@click.option("--days-back", type=int, required=True, help="How far back to analyze.")
+def find_mappings(ctx, project: str, module_repo: str, days_back: int):
     evg_api = ctx.obj["evg_api"]
 
     LOGGER.debug("calling find_flips", project=project, evg_api=evg_api)
-    revisions_for_project = add_revisions_for_project(evg_api, project, module_repo)
+    start_date = datetime.combine(datetime.now() - timedelta(days=days_back), time())
+    revisions_for_project = add_revisions_for_project(evg_api, project, start_date, module_repo)
     #  revisions_for_project = _repo_for_module(evg_api, project, module_repo)
     repo = _get_project_repo(evg_api, project, module_repo)
     revisions = revisions_for_project["project_revisions_to_analyze"]
     source_re = re.compile("^src/mongo")
     test_re = re.compile("^jstests")
-    heatmap = Heatmap.create_heatmap(repo, revisions, test_re, source_re, None, revisions[3])
+    heatmap = Heatmap.create_heatmap(repo, revisions, test_re, source_re, start_date)
 
     #  print(json.dumps(revisions_for_project, indent=4))
     print(json.dumps(heatmap.get_heatmap(), indent=4))

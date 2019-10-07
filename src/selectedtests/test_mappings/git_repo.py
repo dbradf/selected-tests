@@ -10,38 +10,6 @@ structlog.configure(logger_factory=LoggerFactory())
 LOGGER = structlog.get_logger(__name__)
 
 
-class GitRepo(object):
-    """A git repository."""
-    def __init__(self, repo: Repo):
-        """
-        Create a new GitRepo.
-        :param repo: Repository representing repo.
-        """
-        self._repo = repo
-
-    @classmethod
-    def local_repo(cls, path):
-        """
-        Create a GitRepo for a local repository.
-        :param path: Path to local repository.
-        :return: GitRepo for local repository.
-        """
-        return cls(Repo(path))
-
-    def head(self):
-        return self._repo.head.commit
-
-    def walk_commits(self, start_commit):
-        """
-        Walk the commits in the repository.
-
-        :param start_commit: Commit to start walking.
-        :return: Generator that walks commits.
-        """
-        for commit in self._repo.iter_commits(start_commit):
-            yield GitCommit(commit)
-
-
 class GitCommit(object):
     """A git commit object."""
     def __init__(self, commit: Commit):
