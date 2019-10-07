@@ -20,7 +20,6 @@ class Heatmap(object):
         """
         self._file_intersection = file_intersection
         self._file_count_map = file_count_map
-        self._normalized_map = None
         self.commit_count = commit_count
 
     @classmethod
@@ -66,36 +65,10 @@ class Heatmap(object):
 
         return Heatmap(file_intersection, file_count, commit_count)
 
-    def get_heatmap(self, normalize=False):
+    def get_heatmap(self):
         """
         Get a dictionary of the heatmap.
 
-        :param normalize: Return a normalized version.
         :return: Dictionary of the heatmap.
         """
-        if normalize:
-            return self.normalize()
         return self._file_intersection
-
-    @staticmethod
-    def _normalize_row(test_map, src_file_count):
-        """
-        Normalize the given row.
-
-        :param test_map: Map to normalize.
-        :param src_file_count: Number of time the source file has been seen.
-        :return: Normalized version of row.
-        """
-        return {k: v / src_file_count for k, v in test_map.items()}
-
-    def normalize(self):
-        """
-        Get a normalized version of the heatmap.
-
-        :return: Normalized version of heatmap.
-        """
-        if not self._normalized_map:
-            self._normalized_map = {
-                k: self._normalize_row(v, self._file_count_map[k])
-                for k, v in self._file_intersection.items()}
-        return self._normalized_map
