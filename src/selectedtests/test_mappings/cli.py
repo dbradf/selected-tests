@@ -17,7 +17,6 @@ from selectedtests.test_mappings.test_mapping import TestMapper
 LOGGER = structlog.get_logger(__name__)
 
 EXTERNAL_LIBRARIES = ["evergreen.api", "urllib3"]
-DEFAULT_BRANCH = "master"
 PROJECT_FOLDER_NAME = "mongo"
 CURRENT_DIRECTORY = os.path.dirname(os.path.abspath(__file__))
 PROJECT_FOLDER = os.path.join(CURRENT_DIRECTORY, PROJECT_FOLDER_NAME)
@@ -94,7 +93,7 @@ def find_mappings(ctx, project: str, module_repo: str, source_regex: str, test_r
     source_re = re.compile(source_regex)
     test_re = re.compile(test_regex)
     test_mappings = TestMapper.create_mappings(
-        repo, revisions, test_re, source_re, start_date, project, DEFAULT_BRANCH
+        repo, revisions, test_re, source_re, start_date, project
     )
 
     test_mappings_list = test_mappings.get_mappings()

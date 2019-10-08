@@ -8,11 +8,12 @@ import os.path
 
 structlog.configure(logger_factory=LoggerFactory())
 LOGGER = structlog.get_logger(__name__)
+DEFAULT_BRANCH = "master"
 
 
 class TestMapper(object):
     def __init__(
-        self, file_intersection, file_count_map, commit_count, project, repo, branch
+        self, file_intersection, file_count_map, commit_count, project, repo
     ):
         """
         Create a TestMapper object.
@@ -27,11 +28,10 @@ class TestMapper(object):
         self._test_mappings = None
         self.project = project
         self.repo = repo
-        self.branch = branch
 
     @classmethod
     def create_mappings(
-        cls, repo, revisions, test_re, source_re, start_date, project, branch
+        cls, repo, revisions, test_re, source_re, start_date, project
     ):
         file_intersection = defaultdict(lambda: defaultdict(int))
         file_count = defaultdict(int)
@@ -68,7 +68,7 @@ class TestMapper(object):
                     file_intersection[src][test] += 1
 
         return TestMapper(
-            file_intersection, file_count, commit_count, project, repo, branch
+            file_intersection, file_count, commit_count, project, repo
         )
 
     def get_mappings(self):
@@ -87,7 +87,7 @@ class TestMapper(object):
                 "source_file": source_file,
                 "project": self.project,
                 "repo": repo_name,
-                "branch": self.branch,
+                "branch": DEFAULT_BRANCH,
                 "source_file_seen_count": self._file_count_map[source_file],
                 "test_files": test_files,
             }
