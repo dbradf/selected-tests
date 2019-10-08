@@ -10,12 +10,12 @@ structlog.configure(logger_factory=LoggerFactory())
 LOGGER = structlog.get_logger(__name__)
 
 
-class Heatmap(object):
+class TestMapping(object):
     def __init__(
         self, file_intersection, file_count_map, commit_count, project, repo, branch
     ):
         """
-        Create a Heatmap object.
+        Create a TestMapping object.
 
         :param file_intersection: Map of how files intersect.
         :param file_count_map: Map of how many times files where seen.
@@ -30,18 +30,9 @@ class Heatmap(object):
         self.branch = branch
 
     @classmethod
-    def create_heatmap(
+    def create_mappings(
         cls, repo, revisions, test_re, source_re, start_date, project, branch
     ):
-        """
-        Create a heatmap for the given repository.
-
-        :param repo: Repository to analyze.
-        :param test_re: Regular expression to match tests.
-        :param source_re: Regular expression to match source.
-        :param start_date: How far back to analyze commits.
-        :return: Number of commits visited, Heatmap of repo, count file.
-        """
         file_intersection = defaultdict(lambda: defaultdict(int))
         file_count = defaultdict(int)
 
@@ -73,24 +64,19 @@ class Heatmap(object):
 
             for src in src_changed:
                 file_count[src] += 1
-                for t in tests_changed:
-                    file_intersection[src][t] += 1
+                for test in tests_changed:
+                    file_intersection[src][test] += 1
 
-        return Heatmap(
+        return TestMapping(
             file_intersection, file_count, commit_count, project, repo, branch
         )
 
-    def get_heatmap(self):
-        """
-        Get a dictionary of the heatmap.
-
-        :return: Dictionary of the heatmap.
-        """
+    def get_mappings(self):
         if not self._test_mappings:
-            self._test_mappings = self._generate_test_mappings()
+            self._test_mappings = self._transform_mappings()
         return self._test_mappings
 
-    def _generate_test_mappings(self):
+    def _transform_mappings(self):
         test_mappings = []
         repo_name = os.path.basename(self.repo.working_dir)
         for source_file, test_file_count_dict in self._file_intersection.items():

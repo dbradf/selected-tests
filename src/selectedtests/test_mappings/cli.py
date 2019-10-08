@@ -12,7 +12,7 @@ from evergreen.api import EvergreenApi
 from evergreen.api import CachedEvergreenApi
 
 from selectedtests.test_mappings.find_revisions import add_revisions_for_project
-from selectedtests.test_mappings.heatmap import Heatmap
+from selectedtests.test_mappings.test_mapping import TestMapping
 
 LOGGER = structlog.get_logger(__name__)
 
@@ -91,12 +91,13 @@ def find_mappings(ctx, project: str, module_repo: str, days_back: int):
     revisions = revisions_for_project["project_revisions_to_analyze"]
     source_re = re.compile("^src/mongo")
     test_re = re.compile("^jstests")
-    heatmap = Heatmap.create_heatmap(
+    test_mappings = TestMapping.create_mappings(
         repo, revisions, test_re, source_re, start_date, project, DEFAULT_BRANCH
     )
 
     #  print(json.dumps(revisions_for_project, indent=4))
-    print(json.dumps(heatmap.get_heatmap(), indent=4))
+    test_mappings_list = test_mappings.get_mappings()
+    print(json.dumps(test_mappings_list, indent=4))
 
 
 def main():
