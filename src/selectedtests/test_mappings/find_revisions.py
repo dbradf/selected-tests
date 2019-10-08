@@ -8,7 +8,9 @@ from structlog import get_logger
 LOGGER = get_logger(__name__)
 
 
-def _add_project_revision_for_version(version: Version, project_revisions_to_analyze: list):
+def _add_project_revision_for_version(
+    version: Version, project_revisions_to_analyze: list
+):
     """
     Build a dictionary of tasks that flipped for builds in this version.
 
@@ -18,7 +20,9 @@ def _add_project_revision_for_version(version: Version, project_revisions_to_ana
     project_revisions_to_analyze.append(version.revision)
 
 
-def _add_module_revision_for_version(version: Version, module_repo: str, module_revisions_to_analyze: list):
+def _add_module_revision_for_version(
+    version: Version, module_repo: str, module_revisions_to_analyze: list
+):
     """
     Build a dictionary of tasks that flipped for builds in this version.
 
@@ -37,7 +41,7 @@ def _add_module_revision_for_version(version: Version, module_repo: str, module_
 
 
 def add_revisions_for_project(
-        evg_api: EvergreenApi, project: str, start_date: int, module_repo: str = ""
+    evg_api: EvergreenApi, project: str, start_date: int, module_repo: str = ""
 ) -> Dict:
     """
     Find test flips in the evergreen project.

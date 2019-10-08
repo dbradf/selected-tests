@@ -17,6 +17,10 @@ from selectedtests.test_mappings.heatmap import Heatmap
 LOGGER = structlog.get_logger(__name__)
 
 EXTERNAL_LIBRARIES = ["evergreen.api", "urllib3"]
+DEFAULT_BRANCH = "master"
+PROJECT_FOLDER_NAME = "mongo"
+CURRENT_DIRECTORY = os.path.dirname(os.path.abspath(__file__))
+PROJECT_FOLDER = os.path.join(CURRENT_DIRECTORY, PROJECT_FOLDER_NAME)
 
 
 def _setup_logging(verbose: bool):
@@ -47,12 +51,11 @@ def _get_module_repo(evg_api: EvergreenApi, project: str, module_repo: str):
 
 def _get_project_repo(evg_api: EvergreenApi, project: str, module_repo: str):
     repo_url = "https://github.com/mongodb/mongo"
-    CURRENT_DIRECTORY = os.path.dirname(os.path.abspath(__file__))
-    PROJECT_REPO = os.path.join(CURRENT_DIRECTORY, "mongo")
-    if os.path.exists(PROJECT_REPO):
-        repo = Repo(PROJECT_REPO)
+    if os.path.exists(PROJECT_FOLDER):
+        repo = Repo(PROJECT_FOLDER)
+        repo.remotes.origin.pull()
     else:
-        repo = Repo.clone_from(repo_url, PROJECT_REPO)
+        repo = Repo.clone_from(repo_url, PROJECT_FOLDER)
     return repo
 
 
@@ -80,13 +83,17 @@ def find_mappings(ctx, project: str, module_repo: str, days_back: int):
 
     LOGGER.debug("calling find_flips", project=project, evg_api=evg_api)
     start_date = datetime.combine(datetime.now() - timedelta(days=days_back), time())
-    revisions_for_project = add_revisions_for_project(evg_api, project, start_date, module_repo)
+    revisions_for_project = add_revisions_for_project(
+        evg_api, project, start_date, module_repo
+    )
     #  revisions_for_project = _repo_for_module(evg_api, project, module_repo)
     repo = _get_project_repo(evg_api, project, module_repo)
     revisions = revisions_for_project["project_revisions_to_analyze"]
     source_re = re.compile("^src/mongo")
     test_re = re.compile("^jstests")
-    heatmap = Heatmap.create_heatmap(repo, revisions, test_re, source_re, start_date)
+    heatmap = Heatmap.create_heatmap(
+        repo, revisions, test_re, source_re, start_date, project, DEFAULT_BRANCH
+    )
 
     #  print(json.dumps(revisions_for_project, indent=4))
     print(json.dumps(heatmap.get_heatmap(), indent=4))
