@@ -10,12 +10,12 @@ structlog.configure(logger_factory=LoggerFactory())
 LOGGER = structlog.get_logger(__name__)
 
 
-class TestMapping(object):
+class TestMapper(object):
     def __init__(
         self, file_intersection, file_count_map, commit_count, project, repo, branch
     ):
         """
-        Create a TestMapping object.
+        Create a TestMapper object.
 
         :param file_intersection: Map of how files intersect.
         :param file_count_map: Map of how many times files where seen.
@@ -67,7 +67,7 @@ class TestMapping(object):
                 for test in tests_changed:
                     file_intersection[src][test] += 1
 
-        return TestMapping(
+        return TestMapper(
             file_intersection, file_count, commit_count, project, repo, branch
         )
 

@@ -28,8 +28,8 @@ $ pytest --cov=src --cov-report=html
 # Pushing to staging
 The staging environment for this service is
 [here](https://selected-tests.server-tig.staging.corp.mongodb.com). In order to test your
-changes there, make a pr with your branch and make sure it passes the required evergreen tests. Then, 
-push your changes to the remote 'staging' branch. 
+changes there, make a pr with your branch and make sure it passes the required evergreen tests. Then,
+push your changes to the remote 'staging' branch.
 
 That command will look something like this if your branch is called 'new_branch'
  and the original selected-tests repo is called origin:
@@ -54,7 +54,7 @@ to configure your editor to automatically format your code.
 This project is checked with [pydocstyle](https://github.com/PyCQA/pydocstyle). This ensures that best
 practices for pydoc's are followed and that every function and class has a pydoc associated with it.
 
-In order to run it locally, run 
+In order to run it locally, run
 ```
 pydocstyle src
 ```
@@ -68,7 +68,7 @@ If any new endpoints are added to the service or if the service is updated in su
 the existing endpoints' contracts change, the swagger documentation must be updated to reflect the
 new state of the service before that change can be merged to master.
 
-Documentation for how the swagger documentation is done can be found 
+Documentation for how the swagger documentation is done can be found
 [here](https://flask-restplus.readthedocs.io/en/stable/swagger.html).
 
 ## Deploy
@@ -76,3 +76,10 @@ Documentation for how the swagger documentation is done can be found
 Deployment is done via helm to [kanopy](https://github.com/10gen/kanopy-docs#index). The project
 will automatically be deployed on merge to master. The deployed application will be at
 http://selected-tests.server-tig.prod.corp.mongodb.com .
+
+## How to run test mappings CLI
+```
+test-mappings --verbose find-mappings --project mongodb-mongo-master
+--module-repo mongo-enterprise-modules --days-back 3 --source-regex "^src/mongo"
+--test-regex "^jstests"
+```

@@ -12,7 +12,7 @@ from evergreen.api import EvergreenApi
 from evergreen.api import CachedEvergreenApi
 
 from selectedtests.test_mappings.find_revisions import add_revisions_for_project
-from selectedtests.test_mappings.test_mapping import TestMapping
+from selectedtests.test_mappings.test_mapping import TestMapper
 
 LOGGER = structlog.get_logger(__name__)
 
@@ -77,8 +77,10 @@ def cli(ctx, verbose: str):
 @click.option(
     "--module-repo", type=str, default="", help="Evergreen project's module to analyze."
 )
+@click.option('-s', '--source-regex', required=True, help='Regex to match source files.')
+@click.option('-t', '--test-regex', required=True, help='Regex to match test files.')
 @click.option("--days-back", type=int, required=True, help="How far back to analyze.")
-def find_mappings(ctx, project: str, module_repo: str, days_back: int):
+def find_mappings(ctx, project: str, module_repo: str, source_regex: str, test_regex: str, days_back: int):
     evg_api = ctx.obj["evg_api"]
 
     LOGGER.debug("calling find_flips", project=project, evg_api=evg_api)
@@ -89,13 +91,12 @@ def find_mappings(ctx, project: str, module_repo: str, days_back: int):
     #  revisions_for_project = _repo_for_module(evg_api, project, module_repo)
     repo = _get_project_repo(evg_api, project, module_repo)
     revisions = revisions_for_project["project_revisions_to_analyze"]
-    source_re = re.compile("^src/mongo")
-    test_re = re.compile("^jstests")
-    test_mappings = TestMapping.create_mappings(
+    source_re = re.compile(source_regex)
+    test_re = re.compile(test_regex)
+    test_mappings = TestMapper.create_mappings(
         repo, revisions, test_re, source_re, start_date, project, DEFAULT_BRANCH
     )
 
-    #  print(json.dumps(revisions_for_project, indent=4))
     test_mappings_list = test_mappings.get_mappings()
     print(json.dumps(test_mappings_list, indent=4))
 
