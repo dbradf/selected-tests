@@ -1,23 +1,23 @@
 import json
 import logging
-from datetime import datetime, time, timedelta
-from git import Repo
 import pdb
 import re
-import os.path
+
+from datetime import datetime, time, timedelta
 
 import click
 import structlog
-from evergreen.api import EvergreenApi
+
+from git import Repo
 from evergreen.api import CachedEvergreenApi
 
 from selectedtests.test_mappings.find_revisions import get_project_info
 from selectedtests.test_mappings.test_mapper import TestMapper
+from selectedtests.test_mappings.git_helper import pull_remote_repo
 
 LOGGER = structlog.get_logger(__name__)
 
 EXTERNAL_LIBRARIES = ["evergreen.api", "urllib3"]
-CURRENT_DIRECTORY = os.path.dirname(os.path.abspath(__file__))
 
 
 def _setup_logging(verbose: bool):
@@ -27,18 +27,6 @@ def _setup_logging(verbose: bool):
     logging.basicConfig(level=level)
     for external_lib in EXTERNAL_LIBRARIES:
         logging.getLogger(external_lib).setLevel(logging.WARNING)
-
-
-def _get_repo(repo: str, branch: str, owner: str = "mongodb"):
-    repo_url = f"https://github.com/{owner}/{repo}"
-    repo_destination_folder = repo
-    project_folder = os.path.join(CURRENT_DIRECTORY, repo_destination_folder)
-    if os.path.exists(project_folder):
-        repo = Repo(project_folder)
-        repo.remotes.origin.pull()
-    else:
-        repo = Repo.clone_from(repo_url, project_folder, branch=branch)
-    return repo
 
 
 @click.group()
@@ -80,7 +68,7 @@ def find_mappings(
     project_info = get_project_info(evg_api, project, start_date, module_repo)
 
     project_revisions = project_info["project_revisions_to_analyze"]
-    project_repo = _get_repo(project_info["repo"], project_info["branch"])
+    project_repo = pull_remote_repo(project_info["repo"], project_info["branch"])
     source_re = re.compile(source_regex)
     test_re = re.compile(test_regex)
     project_test_mappings = TestMapper.create_mappings(
@@ -95,7 +83,7 @@ def find_mappings(
     project_test_mappings_list = project_test_mappings.get_mappings()
 
     module_revisions = project_info["module_revisions_to_analyze"]
-    module_repo = _get_repo(
+    module_repo = pull_remote_repo(
         project_info["module_repo"], project_info["module_branch"], project_info["module_owner"]
     )
     module_source_re = re.compile(module_source_regex)

@@ -3,7 +3,7 @@ from collections import defaultdict
 import structlog
 from structlog.stdlib import LoggerFactory
 import pdb
-from selectedtests.test_mappings.git_repo import GitCommit
+from selectedtests.test_mappings.git_helper import GitCommit
 import os.path
 
 structlog.configure(logger_factory=LoggerFactory())
@@ -29,6 +29,7 @@ class TestMapper(object):
 
     @classmethod
     def create_mappings(cls, repo, revisions, test_re, source_re, start_date, project, branch):
+        pdb.set_trace()
         file_intersection = defaultdict(lambda: defaultdict(int))
         file_count = defaultdict(int)
 
