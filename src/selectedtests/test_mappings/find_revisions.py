@@ -24,8 +24,6 @@ def _add_module_revision_for_version(
         len(module_revisions_to_analyze) == 0
         or module_revisions_to_analyze[-1] != module_revision
     ):
-        module_revision_string = f'{version.version_id} then {module_revision}'
-        print(module_revision_string)
         module_revisions_to_analyze.append(module_revision)
 
 
