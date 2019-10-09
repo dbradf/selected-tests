@@ -80,6 +80,7 @@ http://selected-tests.server-tig.prod.corp.mongodb.com .
 ## How to run test mappings CLI
 ```
 test-mappings --verbose find-mappings --project mongodb-mongo-master
---module-repo mongo-enterprise-modules --days-back 3 --source-regex "^src/mongo"
---test-regex "^jstests"
+--module-repo mongo-enterprise-modules --days-back 60 --source-regex
+"^src/mongo" --test-regex "^jstests" --module-source-regex "src"
+--module-test-regex "jstests"
 ```
