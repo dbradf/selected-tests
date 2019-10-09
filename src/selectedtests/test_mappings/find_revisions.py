@@ -20,10 +20,7 @@ def _add_module_revision_for_version(
     for module in modules:
         if modules[module].repo == module_repo:
             module_revision = modules[module].revision
-    if (
-        len(module_revisions_to_analyze) == 0
-        or module_revisions_to_analyze[-1] != module_revision
-    ):
+    if len(module_revisions_to_analyze) == 0 or module_revisions_to_analyze[-1] != module_revision:
         module_revisions_to_analyze.append(module_revision)
 
 

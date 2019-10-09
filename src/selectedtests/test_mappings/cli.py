@@ -79,13 +79,20 @@ def find_mappings(
     start_date = datetime.combine(datetime.now() - timedelta(days=days_back), time())
     project_info = get_project_info(evg_api, project, start_date, module_repo)
 
-    #  project_revisions = project_info["project_revisions_to_analyze"]
-    #  project_repo = _get_repo(project_info["repo"], project_info["branch"])
-    #  source_re = re.compile(source_regex)
-    #  test_re = re.compile(test_regex)
-    #  project_test_mappings = TestMapper.create_mappings(
-    #  project_repo, project_revisions, test_re, source_re, start_date, project, project_info["branch"]
-    #  )
+    project_revisions = project_info["project_revisions_to_analyze"]
+    project_repo = _get_repo(project_info["repo"], project_info["branch"])
+    source_re = re.compile(source_regex)
+    test_re = re.compile(test_regex)
+    project_test_mappings = TestMapper.create_mappings(
+        project_repo,
+        project_revisions,
+        test_re,
+        source_re,
+        start_date,
+        project,
+        project_info["branch"],
+    )
+    project_test_mappings_list = project_test_mappings.get_mappings()
 
     module_revisions = project_info["module_revisions_to_analyze"]
     module_repo = _get_repo(
@@ -102,11 +109,10 @@ def find_mappings(
         project,
         project_info["module_branch"],
     )
-
-    #  test_mappings_list = project_test_mappings.get_mappings()
-    #  print(json.dumps(test_mappings_list, indent=4))
     module_test_mappings_list = module_test_mappings.get_mappings()
-    print(json.dumps(module_test_mappings_list, indent=4))
+
+    test_mappings_list = project_test_mappings_list + module_test_mappings_list
+    print(json.dumps(test_mappings_list, indent=4))
 
 
 def main():
