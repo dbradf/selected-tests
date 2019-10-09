@@ -29,8 +29,8 @@ class TestMapper(object):
 
     @classmethod
     def create_mappings(cls, repo, revisions, test_re, source_re, start_date, project, branch):
-        file_intersection = defaultdict(lambda: defaultdict(int))
-        file_count = defaultdict(int)
+        file_intersection = defaultdict(lambda: defaultdict(list))
+        file_count = defaultdict(list)
 
         LOGGER.debug("searching until", ts=start_date)
         commit_count = 0
@@ -59,9 +59,9 @@ class TestMapper(object):
                     src_changed.add(path)
 
             for src in src_changed:
-                file_count[src] += 1
+                file_count[src].append(commit.id)
                 for test in tests_changed:
-                    file_intersection[src][test] += 1
+                    file_intersection[src][test].append(commit.id)
 
         return TestMapper(file_intersection, file_count, commit_count, project, repo, branch)
 
