@@ -1,7 +1,7 @@
 import os.path
 
 from typing import Any, Set
-from git import Repo, Commit
+from git import Repo, Commit, Diff
 
 import structlog
 from structlog.stdlib import LoggerFactory
@@ -24,7 +24,7 @@ def pull_remote_repo(repo: str, branch: str, owner: str = "mongodb"):
     return repo
 
 
-def _paths_for_iter(diff, iter_type):
+def _paths_for_iter(diff: Diff, iter_type: str):
     """
     Get the set for all the files in the given diff for the specified type.
 
@@ -38,23 +38,22 @@ def _paths_for_iter(diff, iter_type):
 
 
 def modified_files_for_commit(commit: Commit, log: Any) -> Set:
-    parent = commit.parents[0] if commit.parents else None
-
-    if not bool(parent):
+    if not commit.parents:
         return {}
 
+    parent = commit.parents[0]
     diff = commit.diff(parent)
 
-    modified_files = _paths_for_iter(diff, 'M')
+    modified_files = _paths_for_iter(diff, "M")
     log.debug("modified files", files=modified_files)
 
-    added_files = _paths_for_iter(diff, 'A')
+    added_files = _paths_for_iter(diff, "A")
     log.debug("added files", files=added_files)
 
-    renamed_files = _paths_for_iter(diff, 'R')
+    renamed_files = _paths_for_iter(diff, "R")
     log.debug("renamed files", files=renamed_files)
 
-    deleted_files = _paths_for_iter(diff, 'D')
+    deleted_files = _paths_for_iter(diff, "D")
     log.debug("deleted files", files=deleted_files)
 
     return modified_files.union(added_files).union(renamed_files).union(deleted_files)

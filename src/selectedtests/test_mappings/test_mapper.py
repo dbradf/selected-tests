@@ -1,17 +1,28 @@
 from collections import defaultdict
 
+from datetime import datetime
 import structlog
 from structlog.stdlib import LoggerFactory
 import pdb
 from selectedtests.test_mappings.git_helper import modified_files_for_commit
 import os.path
+from typing import List, Set
+from re import Pattern
 
 structlog.configure(logger_factory=LoggerFactory())
 LOGGER = structlog.get_logger(__name__)
 
 
 class TestMapper(object):
-    def __init__(self, file_intersection, file_count_map, commit_count, project, repo, branch):
+    def __init__(
+        self,
+        file_intersection: defaultdict,
+        file_count_map: defaultdict,
+        commit_count: int,
+        project: str,
+        repo: str,
+        branch: str,
+    ):
         """
         Create a TestMapper object.
 
@@ -28,11 +39,22 @@ class TestMapper(object):
         self.branch = branch
 
     @classmethod
-    def create_mappings(cls, repo, revisions, test_re, source_re, start_date, project, branch):
+    def create_mappings(
+        cls,
+        repo: str,
+        revisions: List[str],
+        test_re: Pattern,
+        source_re: Pattern,
+        start_date: datetime,
+        end_date: datetime,
+        project: str,
+        branch: str,
+    ):
         file_intersection = defaultdict(lambda: defaultdict(int))
         file_count = defaultdict(int)
 
-        LOGGER.debug("searching until", ts=start_date)
+        LOGGER.debug("searching from", ts=start_date)
+        LOGGER.debug("searching until", ts=end_date)
         commit_count = 0
         for revision in revisions:
             commit = repo.commit(revision)
@@ -43,7 +65,10 @@ class TestMapper(object):
                 id=commit.hexsha,
             )
 
-            if start_date and commit.committed_datetime.timestamp() < start_date.timestamp():
+            if commit.committed_datetime.timestamp() < start_date.timestamp():
+                break
+
+            if commit.committed_datetime.timestamp() > end_date.timestamp():
                 break
 
             commit_count += 1

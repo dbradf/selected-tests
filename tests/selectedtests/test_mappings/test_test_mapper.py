@@ -12,7 +12,8 @@ import selectedtests.test_mappings.test_mapper as under_test
 CURRENT_DIRECTORY = os.path.dirname(os.path.abspath(__file__))
 SOURCE_RE = re.compile(".*source")
 TEST_RE = re.compile(".*test")
-START_DATE = datetime.combine(datetime.now() - timedelta(days=1), time())
+START_DATE = datetime.combine(datetime.now() - timedelta(days=3), time())
+END_DATE = datetime.combine(datetime.now() + timedelta(days=1), time())
 PROJECT = "my_project"
 BRANCH = "master"
 
@@ -109,6 +110,7 @@ class TestTestMapper:
             TEST_RE,
             SOURCE_RE,
             START_DATE,
+            END_DATE,
             PROJECT,
             BRANCH,
         )
@@ -128,6 +130,7 @@ class TestTestMapper:
             TEST_RE,
             SOURCE_RE,
             START_DATE,
+            END_DATE,
             PROJECT,
             BRANCH,
         )
@@ -147,6 +150,7 @@ class TestTestMapper:
             TEST_RE,
             SOURCE_RE,
             START_DATE,
+            END_DATE,
             PROJECT,
             BRANCH,
         )
@@ -168,6 +172,7 @@ class TestTestMapper:
             TEST_RE,
             SOURCE_RE,
             START_DATE,
+            END_DATE,
             PROJECT,
             BRANCH,
         )
@@ -200,6 +205,7 @@ class TestTestMapper:
             TEST_RE,
             SOURCE_RE,
             START_DATE,
+            END_DATE,
             PROJECT,
             BRANCH,
         )

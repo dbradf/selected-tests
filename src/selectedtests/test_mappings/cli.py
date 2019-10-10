@@ -43,15 +43,28 @@ def cli(ctx, verbose: str):
 @click.pass_context
 @click.option("--project", type=str, required=True, help="Evergreen project to analyze.")
 @click.option("--module-repo", type=str, default="", help="Evergreen project's module to analyze.")
-@click.option("-s", "--source-regex", required=True, help="Regex to match source files in project.")
-@click.option("-t", "--test-regex", required=True, help="Regex to match test files in project.")
+@click.option(
+    "--source-regex", type=str, required=True, help="Regex to match source files in project."
+)
+@click.option("--test-regex", type=str, required=True, help="Regex to match test files in project.")
 @click.option(
     "-s", "--module-source-regex", required=True, help="Regex to match source files in module."
 )
 @click.option(
     "-t", "--module-test-regex", required=True, help="Regex to match test files in module."
 )
-@click.option("--days-back", type=int, required=True, help="How far back to analyze.")
+@click.option(
+    "--start",
+    type=str,
+    required=True,
+    help="The date to begin analyzing the project at - has to be an iso date",
+)
+@click.option(
+    "--end",
+    type=str,
+    required=True,
+    help="The date to stop analyzing the project at - has to be an iso date",
+)
 def find_mappings(
     ctx,
     project: str,
@@ -60,12 +73,18 @@ def find_mappings(
     test_regex: str,
     module_source_regex: str,
     module_test_regex: str,
-    days_back: int,
+    start: str,
+    end: str,
 ):
     evg_api = ctx.obj["evg_api"]
 
-    start_date = datetime.combine(datetime.now() - timedelta(days=days_back), time())
-    project_info = get_project_info(evg_api, project, start_date, module_repo)
+    try:
+        start_date = datetime.fromisoformat(start)
+        end_date = datetime.fromisoformat(end)
+    except ValueError as e:
+        raise ValueError("The start or end date could not be parsed - make sure it's an iso date.")
+
+    project_info = get_project_info(evg_api, project, start_date, end_date, module_repo)
 
     project_revisions = project_info["project_revisions_to_analyze"]
     project_repo = pull_remote_repo(project_info["repo"], project_info["branch"])
@@ -77,6 +96,7 @@ def find_mappings(
         test_re,
         source_re,
         start_date,
+        end_date,
         project,
         project_info["branch"],
     )
@@ -94,6 +114,7 @@ def find_mappings(
         module_test_re,
         module_source_re,
         start_date,
+        end_date,
         project,
         project_info["module_branch"],
     )

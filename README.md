@@ -79,8 +79,15 @@ http://selected-tests.server-tig.prod.corp.mongodb.com .
 
 ## How to run test mappings CLI
 ```
+test-mappings find-mappings --project mongodb-mongo-master
+--module-repo mongo-enterprise-modules --source-regex "^src/mongo" --test-regex
+"^jstests" --module-source-regex "src" --module-test-regex "jstests" --start
+2019-10-04T17:15:12 --end 2019-10-04T17:15:12
+```
+You can run it in verbose mode to see logs:
+```
 test-mappings --verbose find-mappings --project mongodb-mongo-master
---module-repo mongo-enterprise-modules --days-back 60 --source-regex
-"^src/mongo" --test-regex "^jstests" --module-source-regex "src"
---module-test-regex "jstests"
+--module-repo mongo-enterprise-modules --source-regex "^src/mongo" --test-regex
+"^jstests" --module-source-regex "src" --module-test-regex "jstests" --start
+2019-10-04T17:15:12 --end 2019-10-04T17:15:12
 ```

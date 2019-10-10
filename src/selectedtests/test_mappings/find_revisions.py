@@ -36,7 +36,11 @@ def _get_module_info(version: Version, module_repo: str):
 
 
 def get_project_info(
-    evg_api: EvergreenApi, project: str, start_date: int, module_repo: str = ""
+    evg_api: EvergreenApi,
+    project: str,
+    start_date: datetime,
+    end_date: datetime,
+    module_repo: str = "",
 ) -> Dict:
     version_iterator = evg_api.versions_by_project(project)
     project_revisions_to_analyze = []
@@ -51,7 +55,10 @@ def get_project_info(
             repo = version.repo
             module_info = _get_module_info(version, module_repo)
         log = LOGGER.bind(version=version.version_id)
-        if version.create_time < start_date:
+        if version.create_time.timestamp() < start_date.timestamp():
+            log.debug("done", create_time=version.create_time)
+            break
+        if version.create_time.timestamp() > end_date.timestamp():
             log.debug("done", create_time=version.create_time)
             break
 
