@@ -62,7 +62,7 @@ class GitCommit(object):
         :return: Parent of commit.
         """
         LOGGER.debug('getting parents', parents=self._commit.parents)
-        return self._commit.parents[0]
+        return self._commit.parents[0] if self._commit.parents else None
 
     def diff_to_parent(self):
         """

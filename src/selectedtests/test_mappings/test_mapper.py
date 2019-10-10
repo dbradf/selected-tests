@@ -29,7 +29,6 @@ class TestMapper(object):
 
     @classmethod
     def create_mappings(cls, repo, revisions, test_re, source_re, start_date, project, branch):
-        pdb.set_trace()
         file_intersection = defaultdict(lambda: defaultdict(int))
         file_count = defaultdict(int)
 
