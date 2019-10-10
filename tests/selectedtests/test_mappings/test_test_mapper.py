@@ -42,5 +42,14 @@ class TestTestMapper:
         start_date = datetime.combine(datetime.now() - timedelta(days=1), time())
         project = "project"
         branch = "branch"
-        mappings = under_test.TestMapper.create_mappings(git_repo, revisions, test_re, source_re, start_date, project, branch);
-        pdb.set_trace()
+        test_mappings = under_test.TestMapper.create_mappings(git_repo, revisions, test_re, source_re, start_date, project, branch)
+        test_mappings_list = test_mappings.get_mappings()
+        source_file_test_mapping = test_mappings_list[0]
+        assert source_file_test_mapping['source_file'] == 'new-source-file'
+        assert source_file_test_mapping['project'] == project
+        assert source_file_test_mapping['repo'] == os.path.basename(git_repo.working_dir)
+        assert source_file_test_mapping['branch'] == branch
+        assert source_file_test_mapping['source_file_seen_count'] == 1
+        for test_file_mapping in source_file_test_mapping['test_files']:
+            assert test_file_mapping['name'] == 'new-test-file'
+            assert test_file_mapping['test_file_seen_count'] == 1
