@@ -1,4 +1,3 @@
-from unittest.mock import MagicMock
 import pdb
 import git
 import os
@@ -14,13 +13,12 @@ CURRENT_DIRECTORY = os.path.dirname(os.path.abspath(__file__))
 SOURCE_RE = re.compile(".*source")
 TEST_RE = re.compile(".*test")
 START_DATE = datetime.combine(datetime.now() - timedelta(days=1), time())
-PROJECT = "my_PROJECT"
+PROJECT = "my_project"
 BRANCH = "master"
 
 
 def initialize_temp_repo(directory):
     repo = git.Repo.init(directory)
-    repo.index.add([])
     repo.index.commit("initial commit -- no files changed")
     return repo
 
