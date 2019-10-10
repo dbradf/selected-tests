@@ -50,7 +50,7 @@ def repo_with_one_source_file_and_no_test_files_changed():
 
 @pytest.fixture(scope="module")
 def repo_with_no_source_files_and_one_test_file_changed():
-    temp_directory = os.path.join(CURRENT_DIRECTORY, "one_source_file_and_no_test_files_changed")
+    temp_directory = os.path.join(CURRENT_DIRECTORY, "no_source_files_and_one_test_file_changed")
     repo = initialize_temp_repo(temp_directory)
     test_file = os.path.join(temp_directory, 'new-test-file')
     open(test_file, 'wb').close()
