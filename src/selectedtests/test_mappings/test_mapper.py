@@ -3,7 +3,7 @@ from collections import defaultdict
 import structlog
 from structlog.stdlib import LoggerFactory
 import pdb
-from selectedtests.test_mappings.git_helper import GitCommit
+from selectedtests.test_mappings.git_helper import modified_files_for_commit
 import os.path
 
 structlog.configure(logger_factory=LoggerFactory())
@@ -35,22 +35,22 @@ class TestMapper(object):
         LOGGER.debug("searching until", ts=start_date)
         commit_count = 0
         for revision in revisions:
-            commit = GitCommit(repo.commit(revision))
+            commit = repo.commit(revision)
             LOGGER.debug(
                 "Investigating commit",
-                summary=commit.summary(),
-                ts=commit.commit_time,
-                id=commit.id,
+                summary=commit.message.splitlines()[0],
+                ts=commit.committed_datetime,
+                id=commit.hexsha,
             )
 
-            if start_date and commit.commit_time.timestamp() < start_date.timestamp():
+            if start_date and commit.committed_datetime.timestamp() < start_date.timestamp():
                 break
 
             commit_count += 1
 
             tests_changed = set()
             src_changed = set()
-            for path in commit.new_or_changed_files(commit.parent):
+            for path in modified_files_for_commit(commit, LOGGER):
                 LOGGER.debug("found change", path=path)
 
                 if test_re.match(path):

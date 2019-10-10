@@ -1,7 +1,7 @@
 import os.path
 
-from typing import Set
-from git import Repo, Commit, DiffIndex
+from typing import Any, Set
+from git import Repo, Commit
 
 import structlog
 from structlog.stdlib import LoggerFactory
@@ -24,85 +24,37 @@ def pull_remote_repo(repo: str, branch: str, owner: str = "mongodb"):
     return repo
 
 
-class GitCommit(object):
-    """A git commit object."""
-    def __init__(self, commit: Commit):
-        """
-        Create an object representing a commit.
+def _paths_for_iter(diff, iter_type):
+    """
+    Get the set for all the files in the given diff for the specified type.
 
-        :param commit: commit object.
-        """
-        self._commit = commit
-
-    def summary(self):
-        """
-        Get a summary of the commit message.
-        :return: Summary of commit message.
-        """
-        return self._commit.message.splitlines()[0]
-
-    @property
-    def commit_time(self):
-        """
-        Get the time the commit was created.
-        :return: commit time.
-        """
-        return self._commit.committed_datetime
-
-    @property
-    def id(self):
-        return self._commit.hexsha
-
-    @property
-    def parent(self):
-        """
-        Get the parent for this commit.
-
-        Returns the first commit if this is a merge commit.
-        :return: Parent of commit.
-        """
-        LOGGER.debug('getting parents', parents=self._commit.parents)
-        return self._commit.parents[0] if self._commit.parents else None
-
-    def diff_to_parent(self):
-        """
-        Compare this commit to its parent.
-
-        :return:
-        """
-        return GitDiff(self._commit.diff(self.parent))
-
-    def new_or_changed_files(self, commit: Commit) -> Set:
-        """
-        Get a set of files that were new or changed compared to the given commit.
-
-        :param commit: Commit to compare against.
-        :return: Set of files that are new or changed between commits.
-        """
-        diff = GitDiff(self._commit.diff(commit))
-        return {change.b_path for change in diff.new_file_iter()}
+    :param diff: git diff to query.
+    :param iter_type: Iter type ['M', 'A', 'R', 'D'].
+    :return: set of changed files.
+    """
+    a_path_changes = {change.a_path for change in diff.iter_change_type(iter_type)}
+    b_path_changes = {change.b_path for change in diff.iter_change_type(iter_type)}
+    return a_path_changes.union(b_path_changes)
 
 
-class GitDiff(object):
-    """A Git diff object."""
-    def __init__(self, diff: DiffIndex):
-        """
-        Create an object representing a diff.
-        :param diff: diff object.
-        """
-        self._diff = diff
+def modified_files_for_commit(commit: Commit, log: Any) -> Set:
+    parent = commit.parents[0] if commit.parents else None
 
-    def new_file_iter(self):
-        """
-        Iterate over file for added changes in the diff.
+    if not bool(parent):
+        return {}
 
-        :return: Iterator for added files.
-        """
-        for patch in self._diff.iter_change_type('M'):
-            yield patch
+    diff = commit.diff(parent)
 
-        for patch in self._diff.iter_change_type('A'):
-            yield patch
+    modified_files = _paths_for_iter(diff, 'M')
+    log.debug("modified files", files=modified_files)
 
-        for patch in self._diff.iter_change_type('R'):
-            yield patch
+    added_files = _paths_for_iter(diff, 'A')
+    log.debug("added files", files=added_files)
+
+    renamed_files = _paths_for_iter(diff, 'R')
+    log.debug("renamed files", files=renamed_files)
+
+    deleted_files = _paths_for_iter(diff, 'D')
+    log.debug("deleted files", files=deleted_files)
+
+    return modified_files.union(added_files).union(renamed_files).union(deleted_files)
