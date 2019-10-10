@@ -12,41 +12,88 @@ import selectedtests.test_mappings.test_mapper as under_test
 
 CURRENT_DIRECTORY = os.path.dirname(os.path.abspath(__file__))
 TEMP_REPO_DIRECTORY = os.path.join(CURRENT_DIRECTORY, 'my-temp-repo')
+SOURCE_RE = re.compile(".*source")
+TEST_RE = re.compile(".*test")
 
-def initialize_repo(directory):
+
+def initialize_temp_repo(directory):
     repo = git.Repo.init(directory)
     repo.index.add([])
     repo.index.commit("initial commit -- no files changed")
     return repo
 
+
+def destroy_temp_repo(directory):
+    shutil.rmtree(directory)
+
+
 @pytest.fixture(scope="module")
-def git_repo_with_one_source_file_and_one_test_file_changed():
-    repo = initialize_repo(TEMP_REPO_DIRECTORY)
-    source_file_name = os.path.join(TEMP_REPO_DIRECTORY, 'new-source-file')
-    test_file_name = os.path.join(TEMP_REPO_DIRECTORY, 'new-test-file')
-    open(source_file_name, 'wb').close()
-    open(test_file_name, 'wb').close()
-    repo.index.add([source_file_name, test_file_name])
+def repo_with_no_source_files_changed():
+    temp_directory = os.path.join(CURRENT_DIRECTORY,"no_source_files_changed")
+    repo = initialize_temp_repo(temp_directory)
+    yield repo
+
+    destroy_temp_repo(temp_directory)
+
+
+@pytest.fixture(scope="module")
+def repo_with_one_source_file_and_no_test_files_changed():
+    temp_directory = os.path.join(CURRENT_DIRECTORY,"one_source_file_and_no_test_files_changed")
+    repo = initialize_temp_repo(temp_directory)
+    source_file = os.path.join(temp_directory, 'new-source-file')
+    open(source_file, 'wb').close()
+    repo.index.add([source_file])
+    repo.index.commit("add source")
+    yield repo
+
+    destroy_temp_repo(temp_directory)
+
+
+@pytest.fixture(scope="module")
+def repo_with_one_source_file_and_one_test_file_changed_in_same_commit():
+    temp_directory = os.path.join(CURRENT_DIRECTORY,"one_source_file_and_one_test_file_changed_in_same_commit")
+    repo = initialize_temp_repo(temp_directory)
+    source_file = os.path.join(temp_directory, 'new-source-file')
+    test_file = os.path.join(temp_directory, 'new-test-file')
+    open(source_file, 'wb').close()
+    open(test_file, 'wb').close()
+    repo.index.add([source_file, test_file])
     repo.index.commit("add source and test file in same commit")
     yield repo
 
-    # teardown fixture
-    shutil.rmtree(TEMP_REPO_DIRECTORY)
+    destroy_temp_repo(temp_directory)
 
 
 class TestTestMapper:
-    #  def test_create_mappings_with_no_source_files_changed(self, git_repo):
-    #  def test_create_mappings_with_one_source_file_and_no_test_files_changed(self, git_repo):
-    #  def test_create_mappings_with_no_source_files_and_one_test_file_changed(self, git_repo):
-    def test_create_mappings_with_one_source_file_and_one_test_file_changed(self, git_repo_with_one_source_file_and_one_test_file_changed):
-        git_repo = git_repo_with_one_source_file_and_one_test_file_changed
-        revisions = [commit.hexsha for commit in git_repo.iter_commits('master')]
-        source_re = re.compile(".*source")
-        test_re = re.compile(".*test")
+    def test_create_mappings_with_no_source_files_changed(self, repo_with_no_source_files_changed):
+        revisions = [commit.hexsha for commit in repo_with_no_source_files_changed.iter_commits('master')]
         start_date = datetime.combine(datetime.now() - timedelta(days=1), time())
         project = "my_project"
         branch = "master"
-        test_mappings = under_test.TestMapper.create_mappings(git_repo, revisions, test_re, source_re, start_date, project, branch)
+        test_mappings = under_test.TestMapper.create_mappings(repo_with_no_source_files_changed, revisions, TEST_RE, SOURCE_RE, start_date, project, branch)
+        test_mappings_list = test_mappings.get_mappings()
+        assert len(test_mappings_list) == 0
+
+
+    def test_create_mappings_with_one_source_file_and_no_test_files_changed(self, repo_with_one_source_file_and_no_test_files_changed):
+        revisions = [commit.hexsha for commit in repo_with_one_source_file_and_no_test_files_changed.iter_commits('master')]
+        start_date = datetime.combine(datetime.now() - timedelta(days=1), time())
+        project = "my_project"
+        branch = "master"
+        test_mappings = under_test.TestMapper.create_mappings(repo_with_one_source_file_and_no_test_files_changed, revisions, TEST_RE, SOURCE_RE, start_date, project, branch)
+        test_mappings_list = test_mappings.get_mappings()
+        assert len(test_mappings_list) == 0
+
+
+    #  def test_create_mappings_with_no_source_files_and_one_test_file_changed(self, git_repo):
+    #  def test_create_mappings_with_one_source_file_and_one_test_file_changed_in_different_commits
+    def test_create_mappings_with_one_source_file_and_one_test_file_changed_in_same_commit(self, repo_with_one_source_file_and_one_test_file_changed_in_same_commit):
+        git_repo = repo_with_one_source_file_and_one_test_file_changed_in_same_commit
+        revisions = [commit.hexsha for commit in git_repo.iter_commits('master')]
+        start_date = datetime.combine(datetime.now() - timedelta(days=1), time())
+        project = "my_project"
+        branch = "master"
+        test_mappings = under_test.TestMapper.create_mappings(git_repo, revisions, TEST_RE, SOURCE_RE, start_date, project, branch)
         test_mappings_list = test_mappings.get_mappings()
 
         source_file_test_mapping = test_mappings_list[0]
