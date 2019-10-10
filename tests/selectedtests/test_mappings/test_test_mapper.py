@@ -20,11 +20,13 @@ def git_repo():
     test_file_name = os.path.join(TEMP_REPO_DIRECTORY, 'new-test-file')
 
     repo = git.Repo.init(TEMP_REPO_DIRECTORY)
+    repo.index.add([])
+    repo.index.commit("initial commit -- no files changed")
     open(source_file_name, 'wb').close()
     open(test_file_name, 'wb').close()
     repo.index.add([source_file_name, test_file_name])
-    repo.index.commit("initial commit")
-    #  repo.active_branch // master
+    repo.index.commit("add source and test file in same commit")
+    #  repo.active_branch // mastersource_file_name, test_file_name
     #  commits = [commit for commit in repo.iter_commits('master', max_count=50)]
     yield repo
 
@@ -35,9 +37,10 @@ def git_repo():
 class TestTestMapper:
     def test_create_mappings(self, git_repo):
         revisions = [commit.hexsha for commit in git_repo.iter_commits('master')]
-        source_re = re.compile("source")
-        test_re = re.compile("test")
+        source_re = re.compile(".*source")
+        test_re = re.compile(".*test")
         start_date = datetime.combine(datetime.now() - timedelta(days=1), time())
         project = "project"
         branch = "branch"
         mappings = under_test.TestMapper.create_mappings(git_repo, revisions, test_re, source_re, start_date, project, branch);
+        pdb.set_trace()
