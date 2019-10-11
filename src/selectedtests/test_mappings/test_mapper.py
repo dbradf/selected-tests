@@ -30,9 +30,9 @@ class TestMapper(object):
         """
         self._file_intersection = file_intersection
         self._file_count_map = file_count_map
-        self.project = project
-        self.repo = repo
-        self.branch = branch
+        self._project = project
+        self._repo = repo
+        self._branch = branch
         self._test_mappings = None
 
     @classmethod
@@ -91,16 +91,16 @@ class TestMapper(object):
 
     def _transform_mappings(self):
         test_mappings = []
-        repo_name = os.path.basename(self.repo.working_dir)
+        repo_name = os.path.basename(self._repo.working_dir)
         for source_file, test_file_count_dict in self._file_intersection.items():
             test_files = []
             for test_file, test_file_seen_count in test_file_count_dict.items():
                 test_files.append({"name": test_file, "test_file_seen_count": test_file_seen_count})
             test_mapping = {
                 "source_file": source_file,
-                "project": self.project,
+                "project": self._project,
                 "repo": repo_name,
-                "branch": self.branch,
+                "branch": self._branch,
                 "source_file_seen_count": self._file_count_map[source_file],
                 "test_files": test_files,
             }
