@@ -18,7 +18,6 @@ class TestMapper(object):
         self,
         file_intersection: defaultdict,
         file_count_map: defaultdict,
-        commit_count: int,
         project: str,
         repo: str,
         branch: str,
@@ -28,15 +27,13 @@ class TestMapper(object):
 
         :param file_intersection: Map of how files intersect.
         :param file_count_map: Map of how many times files where seen.
-        :param commit_count: Number of commits seen.
         """
         self._file_intersection = file_intersection
         self._file_count_map = file_count_map
-        self.commit_count = commit_count
-        self._test_mappings = None
         self.project = project
         self.repo = repo
         self.branch = branch
+        self._test_mappings = None
 
     @classmethod
     def create_mappings(
@@ -55,7 +52,6 @@ class TestMapper(object):
 
         LOGGER.debug("searching from", ts=start_date)
         LOGGER.debug("searching until", ts=end_date)
-        commit_count = 0
         for revision in revisions:
             commit = repo.commit(revision)
             LOGGER.debug(
@@ -70,8 +66,6 @@ class TestMapper(object):
 
             if commit.committed_datetime.timestamp() > end_date.timestamp():
                 break
-
-            commit_count += 1
 
             tests_changed = set()
             src_changed = set()
@@ -88,7 +82,7 @@ class TestMapper(object):
                 for test in tests_changed:
                     file_intersection[src][test] += 1
 
-        return TestMapper(file_intersection, file_count, commit_count, project, repo, branch)
+        return TestMapper(file_intersection, file_count, project, repo, branch)
 
     def get_mappings(self):
         if not self._test_mappings:

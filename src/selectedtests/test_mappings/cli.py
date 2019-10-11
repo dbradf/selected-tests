@@ -86,13 +86,12 @@ def find_mappings(
 
     project_info = get_project_info(evg_api, project, start_date, end_date, module_repo)
 
-    project_revisions = project_info["project_revisions_to_analyze"]
     project_repo = pull_remote_repo(project_info["repo"], project_info["branch"])
     source_re = re.compile(source_regex)
     test_re = re.compile(test_regex)
     project_test_mappings = TestMapper.create_mappings(
         project_repo,
-        project_revisions,
+        project_info["project_revisions_to_analyze"],
         test_re,
         source_re,
         start_date,
@@ -102,7 +101,6 @@ def find_mappings(
     )
     project_test_mappings_list = project_test_mappings.get_mappings()
 
-    module_revisions = project_info["module_revisions_to_analyze"]
     module_repo = pull_remote_repo(
         project_info["module_repo"], project_info["module_branch"], project_info["module_owner"]
     )
@@ -110,7 +108,7 @@ def find_mappings(
     module_test_re = re.compile(module_test_regex)
     module_test_mappings = TestMapper.create_mappings(
         module_repo,
-        module_revisions,
+        project_info["module_revisions_to_analyze"],
         module_test_re,
         module_source_re,
         start_date,
