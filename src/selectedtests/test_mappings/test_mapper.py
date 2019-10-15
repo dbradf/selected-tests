@@ -8,6 +8,7 @@ from selectedtests.test_mappings.git_helper import modified_files_for_commit
 import os.path
 from typing import List, Set
 from re import Pattern
+from git import Repo
 
 structlog.configure(logger_factory=LoggerFactory())
 LOGGER = structlog.get_logger(__name__)
@@ -19,7 +20,7 @@ class TestMapper(object):
         file_intersection: defaultdict,
         file_count_map: defaultdict,
         project: str,
-        repo: str,
+        repo_name: str,
         branch: str,
     ):
         """
@@ -31,15 +32,14 @@ class TestMapper(object):
         self._file_intersection = file_intersection
         self._file_count_map = file_count_map
         self._project = project
-        self._repo = repo
+        self._repo_name = repo_name
         self._branch = branch
         self._test_mappings = None
 
     @classmethod
     def create_mappings(
         cls,
-        repo: str,
-        revisions: List[str],
+        repo: Repo,
         test_re: Pattern,
         source_re: Pattern,
         start_date: datetime,
@@ -52,8 +52,7 @@ class TestMapper(object):
 
         LOGGER.debug("searching from", ts=start_date)
         LOGGER.debug("searching until", ts=end_date)
-        for revision in revisions:
-            commit = repo.commit(revision)
+        for commit in repo.iter_commits(repo.head.commit):
             LOGGER.debug(
                 "Investigating commit",
                 summary=commit.message.splitlines()[0],
@@ -82,7 +81,8 @@ class TestMapper(object):
                 for test in tests_changed:
                     file_intersection[src][test] += 1
 
-        return TestMapper(file_intersection, file_count, project, repo, branch)
+        repo_name = os.path.basename(repo.working_dir)
+        return TestMapper(file_intersection, file_count, project, repo_name, branch)
 
     def get_mappings(self):
         if not self._test_mappings:
@@ -91,7 +91,6 @@ class TestMapper(object):
 
     def _transform_mappings(self):
         test_mappings = []
-        repo_name = os.path.basename(self._repo.working_dir)
         for source_file, test_file_count_dict in self._file_intersection.items():
             test_files = []
             for test_file, test_file_seen_count in test_file_count_dict.items():
@@ -99,7 +98,7 @@ class TestMapper(object):
             test_mapping = {
                 "source_file": source_file,
                 "project": self._project,
-                "repo": repo_name,
+                "repo": self._repo_name,
                 "branch": self._branch,
                 "source_file_seen_count": self._file_count_map[source_file],
                 "test_files": test_files,

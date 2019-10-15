@@ -91,7 +91,6 @@ def find_mappings(
     test_re = re.compile(test_regex)
     project_test_mappings = TestMapper.create_mappings(
         project_repo,
-        project_info["project_revisions_to_analyze"],
         test_re,
         source_re,
         start_date,
@@ -108,7 +107,6 @@ def find_mappings(
     module_test_re = re.compile(module_test_regex)
     module_test_mappings = TestMapper.create_mappings(
         module_repo,
-        project_info["module_revisions_to_analyze"],
         module_test_re,
         module_source_re,
         start_date,
