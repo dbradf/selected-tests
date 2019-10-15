@@ -65,7 +65,7 @@ class TestMapper(object):
                 break
 
             if commit.committed_datetime.timestamp() > end_date.timestamp():
-                break
+                continue
 
             tests_changed = set()
             src_changed = set()

@@ -59,8 +59,7 @@ def get_project_info(
             log.debug("done", create_time=version.create_time)
             break
         if version.create_time.timestamp() > end_date.timestamp():
-            log.debug("done", create_time=version.create_time)
-            break
+            continue
 
         _add_project_revision_for_version(version, project_revisions_to_analyze)
         if bool(module_repo):
