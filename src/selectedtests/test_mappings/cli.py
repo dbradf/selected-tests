@@ -84,9 +84,9 @@ def find_mappings(
     except ValueError as e:
         raise ValueError("The start or end date could not be parsed - make sure it's an iso date.")
 
-    project_info = get_project_info(evg_api, project, start_date, end_date, module_repo)
+    project_info = get_project_info(evg_api, project, module_repo)
 
-    project_repo = pull_remote_repo(project_info["repo"], project_info["branch"])
+    project_repo = pull_remote_repo(project_info["repo_name"], project_info["branch"])
     source_re = re.compile(source_regex)
     test_re = re.compile(test_regex)
     project_test_mappings = TestMapper.create_mappings(
@@ -101,7 +101,7 @@ def find_mappings(
     project_test_mappings_list = project_test_mappings.get_mappings()
 
     module_repo = pull_remote_repo(
-        project_info["module_repo"], project_info["module_branch"], project_info["module_owner"]
+        project_info["module_repo_name"], project_info["module_branch"], project_info["module_owner"]
     )
     module_source_re = re.compile(module_source_regex)
     module_test_re = re.compile(module_test_regex)

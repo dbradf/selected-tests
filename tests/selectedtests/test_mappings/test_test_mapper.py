@@ -101,12 +101,8 @@ def repo_with_one_source_file_and_one_test_file_changed_in_different_commits():
 
 class TestTestMapper:
     def test_no_source_files_changed(self, repo_with_no_source_files_changed):
-        revisions = [
-            commit.hexsha for commit in repo_with_no_source_files_changed.iter_commits("master")
-        ]
         test_mappings = under_test.TestMapper.create_mappings(
             repo_with_no_source_files_changed,
-            revisions,
             TEST_RE,
             SOURCE_RE,
             START_DATE,
@@ -120,13 +116,8 @@ class TestTestMapper:
     def test_one_source_file_and_no_test_files_changed(
         self, repo_with_one_source_file_and_no_test_files_changed
     ):
-        revisions = [
-            commit.hexsha
-            for commit in repo_with_one_source_file_and_no_test_files_changed.iter_commits("master")
-        ]
         test_mappings = under_test.TestMapper.create_mappings(
             repo_with_one_source_file_and_no_test_files_changed,
-            revisions,
             TEST_RE,
             SOURCE_RE,
             START_DATE,
@@ -140,13 +131,8 @@ class TestTestMapper:
     def test_no_source_files_and_one_test_file_changed(
         self, repo_with_no_source_files_and_one_test_file_changed
     ):
-        revisions = [
-            commit.hexsha
-            for commit in repo_with_no_source_files_and_one_test_file_changed.iter_commits("master")
-        ]
         test_mappings = under_test.TestMapper.create_mappings(
             repo_with_no_source_files_and_one_test_file_changed,
-            revisions,
             TEST_RE,
             SOURCE_RE,
             START_DATE,
@@ -160,15 +146,8 @@ class TestTestMapper:
     def test_one_source_file_and_one_test_file_changed_in_same_commit(
         self, repo_with_one_source_file_and_one_test_file_changed_in_same_commit
     ):
-        revisions = [
-            commit.hexsha
-            for commit in repo_with_one_source_file_and_one_test_file_changed_in_same_commit.iter_commits(
-                "master"
-            )
-        ]
         test_mappings = under_test.TestMapper.create_mappings(
             repo_with_one_source_file_and_one_test_file_changed_in_same_commit,
-            revisions,
             TEST_RE,
             SOURCE_RE,
             START_DATE,
@@ -193,15 +172,8 @@ class TestTestMapper:
     def test_one_source_file_and_one_test_file_changed_in_different_commits(
         self, repo_with_one_source_file_and_one_test_file_changed_in_different_commits
     ):
-        revisions = [
-            commit.hexsha
-            for commit in repo_with_one_source_file_and_one_test_file_changed_in_different_commits.iter_commits(
-                "master"
-            )
-        ]
         test_mappings = under_test.TestMapper.create_mappings(
             repo_with_one_source_file_and_one_test_file_changed_in_different_commits,
-            revisions,
             TEST_RE,
             SOURCE_RE,
             START_DATE,
