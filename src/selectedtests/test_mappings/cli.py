@@ -1,3 +1,4 @@
+"""Cli entry point for the test-mappings command."""
 import json
 import logging
 import pdb
@@ -33,6 +34,7 @@ def _setup_logging(verbose: bool):
 @click.option("--verbose", is_flag=True, default=False, help="Enable verbose logging.")
 @click.pass_context
 def cli(ctx, verbose: str):
+    """Entry point for the cli interface. It sets up the evg api instance and logging."""
     ctx.ensure_object(dict)
     ctx.obj["evg_api"] = CachedEvergreenApi.get_api(use_config_file=True)
 
@@ -41,40 +43,61 @@ def cli(ctx, verbose: str):
 
 @cli.command()
 @click.pass_context
-@click.option("--project", type=str, required=True, help="Evergreen project to analyze.")
-@click.option("--module-repo", type=str, default="", help="Evergreen project's module to analyze.")
-@click.option(
-    "--source-regex", type=str, required=True, help="Regex to match source files in project."
-)
-@click.option("--test-regex", type=str, required=True, help="Regex to match test files in project.")
-@click.option(
-    "-s", "--module-source-regex", required=True, help="Regex to match source files in module."
-)
-@click.option(
-    "-t", "--module-test-regex", required=True, help="Regex to match test files in module."
-)
+@click.argument("evergreen_project", required=True)
 @click.option(
     "--start",
     type=str,
+    help="The date to begin analyzing the project at - has to be an iso date. "
+    "Example: 2019-10-11T19:10:38",
     required=True,
-    help="The date to begin analyzing the project at - has to be an iso date",
 )
 @click.option(
     "--end",
     type=str,
+    help="The date to stop analyzing the project at - has to be an iso date. "
+    "Example: 2019-10-11T19:10:38",
     required=True,
-    help="The date to stop analyzing the project at - has to be an iso date",
 )
-def find_mappings(
+@click.option(
+    "--source-file-regex",
+    type=str,
+    help="Regex that will be used to map what files mappings will be created for. "
+    "Example: 'src.*'",
+    required=True,
+)
+@click.option(
+    "--test-file-regex", type=str, required=True, help="Regex to match test files in project."
+)
+@click.option(
+    "--module-name",
+    type=str,
+    help="The name of the associated module that should be analyzed. Example: enterprise",
+)
+@click.option(
+    "--module-source-file-regex",
+    type=str,
+    help="Regex that will be used to map what module files mappings will be created. "
+    "Example: 'src.*'",
+)
+@click.option(
+    "--module-test-file-regex", required=True, help="Regex to match test files in module."
+)
+@click.option(
+    "--output-file",
+    type=str,
+    help="Path to a file where the task mappings should be written to. Example: 'output.txt'",
+)
+def create(
     ctx,
-    project: str,
-    module_repo: str,
-    source_regex: str,
-    test_regex: str,
-    module_source_regex: str,
-    module_test_regex: str,
+    evergreen_project: str,
     start: str,
     end: str,
+    source_file_regex: str,
+    test_file_regex: str,
+    module_name: str,
+    module_source_file_regex: str,
+    module_test_file_regex: str,
+    output_file: str,
 ):
     evg_api = ctx.obj["evg_api"]
 
@@ -82,42 +105,56 @@ def find_mappings(
         start_date = datetime.fromisoformat(start)
         end_date = datetime.fromisoformat(end)
     except ValueError as e:
-        raise ValueError("The start or end date could not be parsed - make sure it's an iso date.")
+        LOGGER.error(str(e))
+        LOGGER.error("The start or end date could not be parsed - make sure it's an iso date")
+        return
 
-    project_info = get_project_info(evg_api, project, module_repo)
+    project_info = get_project_info(evg_api, evergreen_project, module_name)
 
     project_repo = pull_remote_repo(project_info["repo_name"], project_info["branch"])
-    source_re = re.compile(source_regex)
-    test_re = re.compile(test_regex)
+    source_re = re.compile(source_file_regex)
+    test_re = re.compile(test_file_regex)
     project_test_mappings = TestMappings.create_mappings(
         project_repo,
         test_re,
         source_re,
         start_date,
         end_date,
-        project,
+        evergreen_project,
         project_info["branch"],
     )
     project_test_mappings_list = project_test_mappings.get_mappings()
 
     module_repo = pull_remote_repo(
-        project_info["module_repo_name"], project_info["module_branch"], project_info["module_owner"]
+        project_info["module_repo_name"],
+        project_info["module_branch"],
+        project_info["module_owner"],
     )
-    module_source_re = re.compile(module_source_regex)
-    module_test_re = re.compile(module_test_regex)
+    module_source_re = re.compile(module_source_file_regex)
+    module_test_re = re.compile(module_test_file_regex)
     module_test_mappings = TestMappings.create_mappings(
         module_repo,
         module_test_re,
         module_source_re,
         start_date,
         end_date,
-        project,
+        evergreen_project,
         project_info["module_branch"],
     )
     module_test_mappings_list = module_test_mappings.get_mappings()
 
     test_mappings_list = project_test_mappings_list + module_test_mappings_list
-    print(json.dumps(test_mappings_list, indent=4))
+
+    json_dump = json.dumps(test_mappings_list, indent=4)
+
+    if output_file is not None and output_file != "":
+        f = open(output_file, "a")
+        f.write(json_dump)
+        f.close()
+    else:
+        print(json_dump)
+
+    LOGGER.info("Finished processing test mappings")
 
 
 def main():

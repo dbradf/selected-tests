@@ -1,4 +1,4 @@
-"""Cli entry point for the mappings command."""
+"""Cli entry point for the task-mappings command."""
 import os.path
 import json
 import logging
@@ -83,7 +83,7 @@ def cli(ctx, verbose: bool):
     type=str,
     help="Path to a file where the task mappings should be written to. Example: 'output.txt'",
 )
-def task(
+def create(
     ctx,
     evergreen_project: str,
     start: str,

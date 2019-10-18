@@ -44,7 +44,7 @@ class TestCli:
             result = runner.invoke(
                 cli,
                 [
-                    "task",
+                    "create",
                     "mongodb-mongo-master",
                     "--source-file-regex",
                     "src.*",
