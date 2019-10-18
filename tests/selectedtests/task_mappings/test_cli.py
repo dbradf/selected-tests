@@ -20,14 +20,10 @@ def m_ns(relative_name):
 
 class TestCli:
     @patch(ns("CachedEvergreenApi"))
-    @patch(m_ns("_init_repo"))
-    @patch(m_ns("_get_diff"))
     @patch(m_ns("_get_filtered_files"))
     def test_integration(
         self,
         filtered_files_mock,
-        diff_mock,
-        repo_mock,
         cached_evg_api,
         evg_versions,
         expected_output,
