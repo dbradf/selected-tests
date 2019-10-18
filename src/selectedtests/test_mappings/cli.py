@@ -12,7 +12,7 @@ from git import Repo
 from evergreen.api import CachedEvergreenApi
 
 from selectedtests.test_mappings.find_revisions import get_project_info
-from selectedtests.test_mappings.test_mapper import TestMappings
+from selectedtests.test_mappings.create_test_mappings import TestMappings
 from selectedtests.test_mappings.git_helper import pull_remote_repo
 
 LOGGER = structlog.get_logger(__name__)
