@@ -8,19 +8,22 @@ from structlog.stdlib import LoggerFactory
 
 
 structlog.configure(logger_factory=LoggerFactory())
-LOGGER = structlog.get_logger(__name__)
-CURRENT_DIRECTORY = os.path.dirname(os.path.abspath(__file__))
+GITHUB_BASE_URL = "https://github.com"
 
 
-def pull_remote_repo(repo: str, branch: str, owner: str = "mongodb"):
-    repo_url = f"https://github.com/{owner}/{repo}"
-    repo_destination_folder = repo
-    project_folder = os.path.join(CURRENT_DIRECTORY, repo_destination_folder)
-    if os.path.exists(project_folder):
-        repo = Repo(project_folder)
-        repo.remotes.origin.pull()
-    else:
-        repo = Repo.clone_from(repo_url, project_folder, branch=branch)
+def init_repo(temp_dir, repo_name: str, branch: str, org_name: str = "mongodb") -> Repo:
+    """
+    Create the given repo in the given directory and checkout the given branch.
+
+    :param temp_dir: The place where to clone the repo to.
+    :param org_name: The org name in github that owns the repo.
+    :param repo_name: The name of the repo to clone.
+    :param branch: The branch to checkout in the repo.
+    :return: An Repo instance that further git operations can be done on.
+    """
+    repo_path = os.path.join(temp_dir, repo_name)
+    url = f"{GITHUB_BASE_URL}/{org_name}/{repo_name}.git"
+    repo = Repo.clone_from(url, repo_path, branch=branch)
     return repo
 
 

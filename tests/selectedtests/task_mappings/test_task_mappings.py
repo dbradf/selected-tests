@@ -15,7 +15,7 @@ def ns(relative_name):
 
 
 class TestCreateTaskMappings:
-    @patch(ns("_init_repo"))
+    @patch(ns("init_repo"))
     @patch(ns("_get_diff"))
     @patch(ns("_get_filtered_files"))
     @patch(ns("_get_associated_module"))
@@ -51,7 +51,7 @@ class TestCreateTaskMappings:
         end = datetime.combine(date(1, 1, 1), time(1, 3, 0))
 
         mappings = under_test.TaskMappings.create_task_mappings(
-            evg_api_mock, project_name, start, end, None, None, "module", None
+            evg_api_mock, project_name, start, end, None, "module", None
         )
 
         assert len(expected_file_list) == len(mappings.mappings)
@@ -66,7 +66,7 @@ class TestCreateTaskMappings:
                 for task in expected_tasks:
                     assert task in variant_output
 
-    @patch(ns("_init_repo"))
+    @patch(ns("init_repo"))
     @patch(ns("_get_diff"))
     @patch(ns("_get_filtered_files"))
     @patch(ns("_get_associated_module"))
@@ -103,7 +103,7 @@ class TestCreateTaskMappings:
         end = datetime.combine(date(1, 1, 1), time(1, 3, 0))
 
         mappings = under_test.TaskMappings.create_task_mappings(
-            evg_api_mock, project_name, start, end, None, None, "", None
+            evg_api_mock, project_name, start, end, None, "", None
         )
 
         assert len(expected_file_list) == len(mappings.mappings)
@@ -123,7 +123,7 @@ class TestCreateTaskMappings:
                 for task in expected_tasks:
                     assert task in variant_output
 
-    @patch(ns("_init_repo"))
+    @patch(ns("init_repo"))
     @patch(ns("_get_diff"))
     @patch(ns("_get_filtered_files"))
     @patch(ns("_get_flipped_tasks"))
@@ -144,12 +144,12 @@ class TestCreateTaskMappings:
         end = datetime.combine(date(1, 1, 1), time(1, 3, 0))
 
         mappings = under_test.TaskMappings.create_task_mappings(
-            evg_api_mock, project_name, start, end, None, None, "", None
+            evg_api_mock, project_name, start, end, None, "", None
         )
 
         assert 0 == len(mappings.mappings)
 
-    @patch(ns("_init_repo"))
+    @patch(ns("init_repo"))
     @patch(ns("_get_diff"))
     @patch(ns("_get_filtered_files"))
     @patch(ns("_get_flipped_tasks"))
@@ -190,7 +190,7 @@ class TestCreateTaskMappings:
         project_name = "project"
 
         mappings = under_test.TaskMappings.create_task_mappings(
-            evg_api_mock, project_name, desired_start, desired_end, None, None, "", None
+            evg_api_mock, project_name, desired_start, desired_end, None, "", None
         )
 
         assert len(expected_files) == len(mappings.mappings)

@@ -3,22 +3,57 @@ import json
 import logging
 import pdb
 import re
+import tempfile
 
-from datetime import datetime, time, timedelta
+from datetime import datetime, time
+from typing import Dict
 
 import click
 import structlog
 
-from git import Repo
 from evergreen.api import CachedEvergreenApi
+from evergreen.api import EvergreenApi
+from evergreen.version import Version
 
-from selectedtests.test_mappings.find_revisions import get_project_info
 from selectedtests.test_mappings.mappings import TestMappings
-from selectedtests.test_mappings.git_helper import pull_remote_repo
+from selectedtests.git_helper import init_repo
 
 LOGGER = structlog.get_logger(__name__)
 
 EXTERNAL_LIBRARIES = ["evergreen.api", "urllib3"]
+
+
+def _get_module_info(version: Version, module_repo: str):
+    modules = version.get_manifest().modules
+    for module in modules:
+        if modules[module].repo == module_repo:
+            return {
+                "module_owner": modules[module].owner,
+                "module_repo": modules[module].repo,
+                "module_branch": modules[module].branch,
+            }
+
+
+def get_project_info(evg_api: EvergreenApi, project: str, module_repo: str = "") -> Dict:
+    version_iterator = evg_api.versions_by_project(project)
+    branch = None
+    repo_name = None
+    module_info = None
+
+    for num, version in enumerate(version_iterator):
+        if num == 0:
+            branch = version.branch
+            repo_name = version.repo
+            module_info = _get_module_info(version, module_repo)
+            break
+
+    return {
+        "repo_name": repo_name,
+        "branch": branch,
+        "module_owner": module_info["module_owner"],
+        "module_repo_name": module_info["module_repo"],
+        "module_branch": module_info["module_branch"],
+    }
 
 
 def _setup_logging(verbose: bool):
@@ -111,39 +146,41 @@ def create(
 
     project_info = get_project_info(evg_api, evergreen_project, module_name)
 
-    project_repo = pull_remote_repo(project_info["repo_name"], project_info["branch"])
-    source_re = re.compile(source_file_regex)
-    test_re = re.compile(test_file_regex)
-    project_test_mappings = TestMappings.create_mappings(
-        project_repo,
-        test_re,
-        source_re,
-        start_date,
-        end_date,
-        evergreen_project,
-        project_info["branch"],
-    )
-    project_test_mappings_list = project_test_mappings.get_mappings()
+    with tempfile.TemporaryDirectory() as temp_dir:
+        project_repo = init_repo(temp_dir, project_info["repo_name"], project_info["branch"])
+        source_re = re.compile(source_file_regex)
+        test_re = re.compile(test_file_regex)
+        project_test_mappings = TestMappings.create_mappings(
+            project_repo,
+            test_re,
+            source_re,
+            start_date,
+            end_date,
+            evergreen_project,
+            project_info["branch"],
+        )
+        project_test_mappings_list = project_test_mappings.get_mappings()
 
-    module_repo = pull_remote_repo(
-        project_info["module_repo_name"],
-        project_info["module_branch"],
-        project_info["module_owner"],
-    )
-    module_source_re = re.compile(module_source_file_regex)
-    module_test_re = re.compile(module_test_file_regex)
-    module_test_mappings = TestMappings.create_mappings(
-        module_repo,
-        module_test_re,
-        module_source_re,
-        start_date,
-        end_date,
-        evergreen_project,
-        project_info["module_branch"],
-    )
-    module_test_mappings_list = module_test_mappings.get_mappings()
+        module_repo = init_repo(
+            temp_dir,
+            project_info["module_repo_name"],
+            project_info["module_branch"],
+            project_info["module_owner"],
+        )
+        module_source_re = re.compile(module_source_file_regex)
+        module_test_re = re.compile(module_test_file_regex)
+        module_test_mappings = TestMappings.create_mappings(
+            module_repo,
+            module_test_re,
+            module_source_re,
+            start_date,
+            end_date,
+            evergreen_project,
+            project_info["module_branch"],
+        )
+        module_test_mappings_list = module_test_mappings.get_mappings()
 
-    test_mappings_list = project_test_mappings_list + module_test_mappings_list
+        test_mappings_list = project_test_mappings_list + module_test_mappings_list
 
     json_dump = json.dumps(test_mappings_list, indent=4)
 

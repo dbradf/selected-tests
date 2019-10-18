@@ -4,7 +4,7 @@ from datetime import datetime
 import structlog
 from structlog.stdlib import LoggerFactory
 import pdb
-from selectedtests.test_mappings.git_helper import modified_files_for_commit
+from selectedtests.git_helper import modified_files_for_commit
 import os.path
 from typing import List, Set
 from re import Pattern

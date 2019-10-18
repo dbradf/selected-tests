@@ -55,12 +55,6 @@ def cli(ctx, verbose: bool):
     required=True,
 )
 @click.option(
-    "--org-name",
-    type=str,
-    help="The Github organization name - defaults to mongodb",
-    default="mongodb",
-)
-@click.option(
     "--source-file-regex",
     type=str,
     help="Regex that will be used to map what files mappings will be created for. "
@@ -88,7 +82,6 @@ def create(
     evergreen_project: str,
     start: str,
     end: str,
-    org_name: str,
     source_file_regex: str,
     module_name: str,
     module_source_file_regex: str,
@@ -122,7 +115,6 @@ def create(
         evergreen_project,
         start_date,
         end_date,
-        org_name,
         file_regex,
         module_name,
         module_file_regex,
