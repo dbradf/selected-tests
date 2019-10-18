@@ -7,7 +7,7 @@ import pytest
 
 from datetime import datetime, time, timedelta
 
-import selectedtests.test_mappings.test_mapper as under_test
+import selectedtests.test_mappings.test_mappings as under_test
 
 CURRENT_DIRECTORY = os.path.dirname(os.path.abspath(__file__))
 SOURCE_RE = re.compile(".*source")
@@ -120,9 +120,9 @@ def repo_with_files_added_two_days_ago():
     destroy_temp_repo(temp_directory)
 
 
-class TestTestMapper:
+class TestTestMappings:
     def test_no_source_files_changed(self, repo_with_no_source_files_changed):
-        test_mappings = under_test.TestMapper.create_mappings(
+        test_mappings = under_test.TestMappings.create_mappings(
             repo_with_no_source_files_changed,
             TEST_RE,
             SOURCE_RE,
@@ -137,7 +137,7 @@ class TestTestMapper:
     def test_one_source_file_and_no_test_files_changed(
         self, repo_with_one_source_file_and_no_test_files_changed
     ):
-        test_mappings = under_test.TestMapper.create_mappings(
+        test_mappings = under_test.TestMappings.create_mappings(
             repo_with_one_source_file_and_no_test_files_changed,
             TEST_RE,
             SOURCE_RE,
@@ -152,7 +152,7 @@ class TestTestMapper:
     def test_no_source_files_and_one_test_file_changed(
         self, repo_with_no_source_files_and_one_test_file_changed
     ):
-        test_mappings = under_test.TestMapper.create_mappings(
+        test_mappings = under_test.TestMappings.create_mappings(
             repo_with_no_source_files_and_one_test_file_changed,
             TEST_RE,
             SOURCE_RE,
@@ -167,7 +167,7 @@ class TestTestMapper:
     def test_one_source_file_and_one_test_file_changed_in_same_commit(
         self, repo_with_one_source_file_and_one_test_file_changed_in_same_commit
     ):
-        test_mappings = under_test.TestMapper.create_mappings(
+        test_mappings = under_test.TestMappings.create_mappings(
             repo_with_one_source_file_and_one_test_file_changed_in_same_commit,
             TEST_RE,
             SOURCE_RE,
@@ -193,7 +193,7 @@ class TestTestMapper:
     def test_one_source_file_and_one_test_file_changed_in_different_commits(
         self, repo_with_one_source_file_and_one_test_file_changed_in_different_commits
     ):
-        test_mappings = under_test.TestMapper.create_mappings(
+        test_mappings = under_test.TestMappings.create_mappings(
             repo_with_one_source_file_and_one_test_file_changed_in_different_commits,
             TEST_RE,
             SOURCE_RE,
@@ -210,7 +210,7 @@ class TestTestMapper:
     ):
         three_days_ago = datetime.combine(datetime.now() - timedelta(days=3), time())
         two_days_ago = datetime.combine(datetime.now() - timedelta(days=2), time())
-        test_mappings = under_test.TestMapper.create_mappings(
+        test_mappings = under_test.TestMappings.create_mappings(
             repo_with_files_added_two_days_ago,
             TEST_RE,
             SOURCE_RE,
@@ -230,7 +230,7 @@ class TestTestMapper:
     def test_date_range_excludes_time_of_file_changes(
         self, repo_with_files_added_two_days_ago
     ):
-        test_mappings = under_test.TestMapper.create_mappings(
+        test_mappings = under_test.TestMappings.create_mappings(
             repo_with_files_added_two_days_ago,
             TEST_RE,
             SOURCE_RE,

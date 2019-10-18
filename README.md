@@ -21,8 +21,7 @@ python src/selectedtests/app/app.py
 # Create task mappings
 The task mapping cli command has only one required argument - the name of an evergreen project.
 In order to run it, run the below.
-```
-pip install -e .
+``` pip install -e .
 mappings task EVERGREEN_PROJECT_NAME
 ```
 Currently, it can only analyze public git repos. Private repo support is coming in a future version.

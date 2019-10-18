@@ -12,7 +12,7 @@ from git import Repo
 from evergreen.api import CachedEvergreenApi
 
 from selectedtests.test_mappings.find_revisions import get_project_info
-from selectedtests.test_mappings.test_mapper import TestMapper
+from selectedtests.test_mappings.test_mapper import TestMappings
 from selectedtests.test_mappings.git_helper import pull_remote_repo
 
 LOGGER = structlog.get_logger(__name__)
@@ -89,7 +89,7 @@ def find_mappings(
     project_repo = pull_remote_repo(project_info["repo_name"], project_info["branch"])
     source_re = re.compile(source_regex)
     test_re = re.compile(test_regex)
-    project_test_mappings = TestMapper.create_mappings(
+    project_test_mappings = TestMappings.create_mappings(
         project_repo,
         test_re,
         source_re,
@@ -105,7 +105,7 @@ def find_mappings(
     )
     module_source_re = re.compile(module_source_regex)
     module_test_re = re.compile(module_test_regex)
-    module_test_mappings = TestMapper.create_mappings(
+    module_test_mappings = TestMappings.create_mappings(
         module_repo,
         module_test_re,
         module_source_re,
