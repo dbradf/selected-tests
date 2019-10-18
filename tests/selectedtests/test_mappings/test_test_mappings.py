@@ -7,7 +7,7 @@ import pytest
 
 from datetime import datetime, time, timedelta
 
-import selectedtests.test_mappings.create_test_mappings as under_test
+import selectedtests.test_mappings.mappings as under_test
 
 CURRENT_DIRECTORY = os.path.dirname(os.path.abspath(__file__))
 SOURCE_RE = re.compile(".*source")

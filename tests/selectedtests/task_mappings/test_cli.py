@@ -5,7 +5,7 @@ from unittest.mock import patch, MagicMock
 from selectedtests.task_mappings.cli import cli
 
 NS = "selectedtests.task_mappings.cli"
-MAPPINGS_NS = "selectedtests.task_mappings.task_mappings"
+MAPPINGS_NS = "selectedtests.task_mappings.mappings"
 
 
 def ns(relative_name):
