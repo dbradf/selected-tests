@@ -12,7 +12,6 @@ import click
 import structlog
 
 from evergreen.api import CachedEvergreenApi
-from evergreen.api import EvergreenApi
 from evergreen.version import Version
 
 from selectedtests.test_mappings.mappings import TestMappings
@@ -34,7 +33,7 @@ def _get_module_info(version: Version, module_repo: str):
             }
 
 
-def get_project_info(evg_api: EvergreenApi, project: str, module_repo: str = "") -> Dict:
+def get_project_info(evg_api: CachedEvergreenApi, project: str, module_repo: str = "") -> Dict:
     version_iterator = evg_api.versions_by_project(project)
     branch = None
     repo_name = None
