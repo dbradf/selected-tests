@@ -22,11 +22,7 @@ class TestCli:
     @patch(ns("CachedEvergreenApi"))
     @patch(m_ns("_get_filtered_files"))
     def test_integration(
-        self,
-        filtered_files_mock,
-        cached_evg_api,
-        evg_versions,
-        expected_output,
+        self, filtered_files_mock, cached_evg_api, evg_versions, expected_task_mappings_output
     ):
         mock_evg_api = MagicMock()
         mock_evg_api.versions_by_project.return_value = evg_versions
@@ -55,4 +51,4 @@ class TestCli:
             assert result.exit_code == 0
             with open(output_file, "r") as data:
                 output = json.load(data)
-                assert expected_output == output
+                assert expected_task_mappings_output == output

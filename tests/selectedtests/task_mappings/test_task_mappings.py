@@ -1,6 +1,7 @@
 from unittest.mock import MagicMock, patch
 from datetime import datetime, date, time
 import re
+import pdb
 from copy import deepcopy
 
 from selectedtests.task_mappings import mappings as under_test
@@ -255,9 +256,9 @@ class TestTransformationOfTaskMappings:
 
 
 class TestFilteredFiles:
-    @patch(ns("_get_changed_files"))
+    @patch(ns("get_changed_files"))
     def test_filter_files_by_regex(self, changed_files_mock):
-        def changed_files(diff):
+        def changed_files(diff, logger):
             letters = ["a", "b", "c", "ab", "ac", "ba", "bc", "ca", "cb", "abc/test"]
             return [MagicMock(b_path=l) for l in letters]
 

@@ -22,8 +22,10 @@ LOGGER = structlog.get_logger(__name__)
 EXTERNAL_LIBRARIES = ["evergreen.api", "urllib3"]
 
 
-def _get_module_info(version: Version, module_repo: str):
-    modules = version.get_manifest().modules
+def _get_module_info(evg_api: CachedEvergreenApi, project: str, module_repo: str):
+    version_iterator = evg_api.versions_by_project(project)
+    recent_version = next(version_iterator)
+    modules = recent_version.get_manifest().modules
     for module in modules:
         if modules[module].repo == module_repo:
             return {
@@ -33,26 +35,11 @@ def _get_module_info(version: Version, module_repo: str):
             }
 
 
-def get_project_info(evg_api: CachedEvergreenApi, project: str, module_repo: str = "") -> Dict:
-    version_iterator = evg_api.versions_by_project(project)
-    branch = None
-    repo_name = None
-    module_info = None
-
-    for num, version in enumerate(version_iterator):
-        if num == 0:
-            branch = version.branch
-            repo_name = version.repo
-            module_info = _get_module_info(version, module_repo)
-            break
-
-    return {
-        "repo_name": repo_name,
-        "branch": branch,
-        "module_owner": module_info["module_owner"],
-        "module_repo_name": module_info["module_repo"],
-        "module_branch": module_info["module_branch"],
-    }
+def _get_evg_project(evg_api: CachedEvergreenApi, project: str) -> Dict:
+    for evergreen_project in evg_api.all_projects():
+        if evergreen_project.identifier == project:
+            return evergreen_project
+    return None
 
 
 def _setup_logging(verbose: bool):
@@ -114,7 +101,9 @@ def cli(ctx, verbose: str):
     "Example: 'src.*'",
 )
 @click.option(
-    "--module-test-file-regex", required=True, help="Regex to match test files in module."
+    "--module-test-file-regex",
+    type=str,
+    help="Regex to match test files in module."
 )
 @click.option(
     "--output-file",
@@ -143,10 +132,13 @@ def create(
         LOGGER.error("The start or end date could not be parsed - make sure it's an iso date")
         return
 
-    project_info = get_project_info(evg_api, evergreen_project, module_name)
+    evg_project = _get_evg_project(evg_api, evergreen_project)
+    repo_name = evg_project.repo_name
+    branch = evg_project.branch_name
+    repo_owner_name = evg_project.owner_name
 
     with tempfile.TemporaryDirectory() as temp_dir:
-        project_repo = init_repo(temp_dir, project_info["repo_name"], project_info["branch"])
+        project_repo = init_repo(temp_dir, repo_name, branch, repo_owner_name)
         source_re = re.compile(source_file_regex)
         test_re = re.compile(test_file_regex)
         project_test_mappings = TestMappings.create_mappings(
@@ -156,32 +148,33 @@ def create(
             start_date,
             end_date,
             evergreen_project,
-            project_info["branch"],
+            branch,
         )
         project_test_mappings_list = project_test_mappings.get_mappings()
 
-        module_repo = init_repo(
-            temp_dir,
-            project_info["module_repo_name"],
-            project_info["module_branch"],
-            project_info["module_owner"],
-        )
-        module_source_re = re.compile(module_source_file_regex)
-        module_test_re = re.compile(module_test_file_regex)
-        module_test_mappings = TestMappings.create_mappings(
-            module_repo,
-            module_test_re,
-            module_source_re,
-            start_date,
-            end_date,
-            evergreen_project,
-            project_info["module_branch"],
-        )
-        module_test_mappings_list = module_test_mappings.get_mappings()
+        if bool(module_name):
+            module_info = _get_module_info(evg_api, evergreen_project, module_name)
+            module_repo = init_repo(
+                temp_dir,
+                module_info["module_repo"],
+                module_info["module_branch"],
+                module_info["module_owner"],
+            )
+            module_source_re = re.compile(module_source_file_regex)
+            module_test_re = re.compile(module_test_file_regex)
+            module_test_mappings = TestMappings.create_mappings(
+                module_repo,
+                module_test_re,
+                module_source_re,
+                start_date,
+                end_date,
+                evergreen_project,
+                module_info["module_branch"],
+            )
+            module_test_mappings_list = module_test_mappings.get_mappings()
+            project_test_mappings_list.append(module_test_mappings_list)
 
-        test_mappings_list = project_test_mappings_list + module_test_mappings_list
-
-    json_dump = json.dumps(test_mappings_list, indent=4)
+    json_dump = json.dumps(project_test_mappings_list, indent=4)
 
     if output_file is not None and output_file != "":
         f = open(output_file, "a")
