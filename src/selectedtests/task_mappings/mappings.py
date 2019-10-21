@@ -1,7 +1,6 @@
 """Method to create the task mappings for a given evergreen project."""
 from datetime import datetime
 from typing import List, Dict, Generator
-import os.path
 import tempfile
 from re import Pattern, match
 
@@ -11,7 +10,7 @@ from boltons.iterutils import windowed_iter
 from git import Repo, DiffIndex
 from structlog import get_logger
 
-from selectedtests.git_helper import init_repo
+from selectedtests.git_helper import get_changed_files, init_repo
 
 LOGGER = get_logger(__name__)
 
@@ -141,7 +140,7 @@ def _get_filtered_files(diff: DiffIndex, regex: Pattern) -> List[str]:
     :return: A list of the changed files that matched the given regex pattern.
     """
     re: List[str] = []
-    for file in _get_changed_files(diff):
+    for file in get_changed_files(diff, LOGGER):
         if match(regex, file.b_path):
             re.append(file.b_path)
     return re
@@ -224,22 +223,6 @@ def _map_tasks_to_files(changed_files: List[str], flipped_tasks: Dict, task_mapp
             for cur_task in flipped_tasks.get(build_name):
                 cur_flips_for_task = builds_to_task_mappings.setdefault(cur_task, 0)
                 builds_to_task_mappings[cur_task] = cur_flips_for_task + 1
-
-
-def _get_changed_files(diff: DiffIndex):
-    """
-    Create a generator for the diff index. We only want modified, added, and removed files.
-
-    :param diff: The diff to generate files out of.
-    """
-    for patch in diff.iter_change_type("M"):
-        yield patch
-
-    for patch in diff.iter_change_type("A"):
-        yield patch
-
-    for patch in diff.iter_change_type("R"):
-        yield patch
 
 
 def _filter_non_required_distros(builds: List[Build]) -> List[Build]:

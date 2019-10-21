@@ -1,7 +1,7 @@
 import os.path
 
 from typing import Any, Set
-from git import Repo, Commit, Diff
+from git import Commit, Diff, DiffIndex, Repo
 
 import structlog
 from structlog.stdlib import LoggerFactory
@@ -46,7 +46,13 @@ def modified_files_for_commit(commit: Commit, log: Any) -> Set:
 
     parent = commit.parents[0]
     diff = commit.diff(parent)
+    return get_changed_files(diff, log)
 
+
+def get_changed_files(diff: DiffIndex, log: Any) -> Set:
+    """
+    Return modified, added, renamed, and removed files for a diff index.
+    """
     modified_files = _paths_for_iter(diff, "M")
     log.debug("modified files", files=modified_files)
 
