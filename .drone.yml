@@ -27,6 +27,7 @@ pipeline:
     chart_version: 4.1.0
     tiller_ns: server-tig
     client_only: true
+    values: "image.tag=git-${DRONE_COMMIT_SHA:0:7},image.repository=795250896452.dkr.ecr.us-east-1.amazonaws.com/server-tig/${DRONE_REPO_NAME},ingress.enabled=true,ingress.hosts[0]=selected-tests.server-tig.staging.corp.mongodb.com"
     values_files: ["environments/staging.yml"]
     when:
       branch: staging
@@ -59,7 +60,7 @@ pipeline:
     chart_version: 4.1.0
     tiller_ns: server-tig
     client_only: true
-    values_files: ["environments/prod.yml"]
+    values: "image.tag=git-${DRONE_COMMIT_SHA:0:7},image.repository=795250896452.dkr.ecr.us-east-1.amazonaws.com/server-tig/${DRONE_REPO_NAME},ingress.enabled=true,ingress.hosts[0]=selected-tests.server-tig.prod.corp.mongodb.com"
     when:
       branch: master
       event: push
