@@ -32,17 +32,21 @@ def initialize_temp_repo(directory):
     return repo
 
 
-def lydia_repo(temp_directory):
-    repo = initialize_temp_repo(temp_directory)
-    source_file = os.path.join(temp_directory, "new-source-file")
-    test_file = os.path.join(temp_directory, "new-test-file")
-    open(source_file, "wb").close()
-    open(test_file, "wb").close()
-    # os.listdir("temp")
-    # ['new-source-file', 'new-test-file', '.git']
-    repo.index.add([source_file, test_file])
-    repo.index.commit("add source and test file in same commit")
-    return repo
+@pytest.fixture(scope="module")
+def lydia_repo():
+    def _repo(temp_directory):
+        repo = initialize_temp_repo(temp_directory)
+        source_file = os.path.join(temp_directory, "new-source-file")
+        test_file = os.path.join(temp_directory, "new-test-file")
+        open(source_file, "wb").close()
+        open(test_file, "wb").close()
+        # os.listdir("temp")
+        # ['new-source-file', 'new-test-file', '.git']
+        repo.index.add([source_file, test_file])
+        repo.index.commit("add source and test file in same commit")
+        return repo
+
+    return _repo
 
 
 class TestCli:
@@ -55,6 +59,7 @@ class TestCli:
         evg_projects,
         evg_versions,
         expected_test_mappings_output,
+        lydia_repo,
     ):
         mock_evg_api = MagicMock()
         mock_evg_api.all_projects.return_value = evg_projects
