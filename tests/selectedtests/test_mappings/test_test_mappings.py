@@ -20,13 +20,7 @@ class TestTestMappings:
         with tempfile.TemporaryDirectory() as tmpdir:
             repo = repo_with_no_source_files_changed(tmpdir)
             test_mappings = under_test.TestMappings.create_mappings(
-                repo,
-                TEST_RE,
-                SOURCE_RE,
-                ONE_DAY_AGO,
-                ONE_DAY_FROM_NOW,
-                PROJECT,
-                BRANCH,
+                repo, TEST_RE, SOURCE_RE, ONE_DAY_AGO, ONE_DAY_FROM_NOW, PROJECT, BRANCH
             )
             test_mappings_list = test_mappings.get_mappings()
             assert len(test_mappings_list) == 0
@@ -37,13 +31,7 @@ class TestTestMappings:
         with tempfile.TemporaryDirectory() as tmpdir:
             repo = repo_with_one_source_file_and_no_test_files_changed(tmpdir)
             test_mappings = under_test.TestMappings.create_mappings(
-                repo,
-                TEST_RE,
-                SOURCE_RE,
-                ONE_DAY_AGO,
-                ONE_DAY_FROM_NOW,
-                PROJECT,
-                BRANCH,
+                repo, TEST_RE, SOURCE_RE, ONE_DAY_AGO, ONE_DAY_FROM_NOW, PROJECT, BRANCH
             )
             test_mappings_list = test_mappings.get_mappings()
             assert len(test_mappings_list) == 0
@@ -54,13 +42,7 @@ class TestTestMappings:
         with tempfile.TemporaryDirectory() as tmpdir:
             repo = repo_with_no_source_files_and_one_test_file_changed(tmpdir)
             test_mappings = under_test.TestMappings.create_mappings(
-                repo,
-                TEST_RE,
-                SOURCE_RE,
-                ONE_DAY_AGO,
-                ONE_DAY_FROM_NOW,
-                PROJECT,
-                BRANCH,
+                repo, TEST_RE, SOURCE_RE, ONE_DAY_AGO, ONE_DAY_FROM_NOW, PROJECT, BRANCH
             )
             test_mappings_list = test_mappings.get_mappings()
             assert len(test_mappings_list) == 0
@@ -71,22 +53,14 @@ class TestTestMappings:
         with tempfile.TemporaryDirectory() as tmpdir:
             repo = repo_with_one_source_file_and_one_test_file_changed_in_same_commit(tmpdir)
             test_mappings = under_test.TestMappings.create_mappings(
-                repo,
-                TEST_RE,
-                SOURCE_RE,
-                ONE_DAY_AGO,
-                ONE_DAY_FROM_NOW,
-                PROJECT,
-                BRANCH,
+                repo, TEST_RE, SOURCE_RE, ONE_DAY_AGO, ONE_DAY_FROM_NOW, PROJECT, BRANCH
             )
             test_mappings_list = test_mappings.get_mappings()
 
             source_file_test_mapping = test_mappings_list[0]
             assert source_file_test_mapping["source_file"] == "new-source-file"
             assert source_file_test_mapping["project"] == PROJECT
-            assert source_file_test_mapping["repo"] == os.path.basename(
-                tmpdir
-            )
+            assert source_file_test_mapping["repo"] == os.path.basename(tmpdir)
             assert source_file_test_mapping["branch"] == BRANCH
             assert source_file_test_mapping["source_file_seen_count"] == 1
             for test_file_mapping in source_file_test_mapping["test_files"]:
@@ -99,13 +73,7 @@ class TestTestMappings:
         with tempfile.TemporaryDirectory() as tmpdir:
             repo = repo_with_one_source_file_and_one_test_file_changed_in_different_commits(tmpdir)
             test_mappings = under_test.TestMappings.create_mappings(
-                repo,
-                TEST_RE,
-                SOURCE_RE,
-                ONE_DAY_AGO,
-                ONE_DAY_FROM_NOW,
-                PROJECT,
-                BRANCH,
+                repo, TEST_RE, SOURCE_RE, ONE_DAY_AGO, ONE_DAY_FROM_NOW, PROJECT, BRANCH
             )
             test_mappings_list = test_mappings.get_mappings()
             assert len(test_mappings_list) == 0
@@ -116,13 +84,7 @@ class TestTestMappings:
             three_days_ago = datetime.combine(datetime.now() - timedelta(days=3), time())
             two_days_ago = datetime.combine(datetime.now() - timedelta(days=2), time())
             test_mappings = under_test.TestMappings.create_mappings(
-                repo,
-                TEST_RE,
-                SOURCE_RE,
-                three_days_ago,
-                two_days_ago,
-                PROJECT,
-                BRANCH,
+                repo, TEST_RE, SOURCE_RE, three_days_ago, two_days_ago, PROJECT, BRANCH
             )
             test_mappings_list = test_mappings.get_mappings()
 
@@ -136,13 +98,7 @@ class TestTestMappings:
         with tempfile.TemporaryDirectory() as tmpdir:
             repo = repo_with_files_added_two_days_ago(tmpdir)
             test_mappings = under_test.TestMappings.create_mappings(
-                repo,
-                TEST_RE,
-                SOURCE_RE,
-                ONE_DAY_AGO,
-                ONE_DAY_FROM_NOW,
-                PROJECT,
-                BRANCH,
+                repo, TEST_RE, SOURCE_RE, ONE_DAY_AGO, ONE_DAY_FROM_NOW, PROJECT, BRANCH
             )
             test_mappings_list = test_mappings.get_mappings()
             assert len(test_mappings_list) == 0

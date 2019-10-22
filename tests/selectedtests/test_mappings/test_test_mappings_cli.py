@@ -32,7 +32,7 @@ class TestCli:
         evg_projects,
         evg_versions,
         expected_test_mappings_output,
-        repo_with_files_added_two_days_ago
+        repo_with_files_added_two_days_ago,
     ):
         mock_evg_api = MagicMock()
         mock_evg_api.all_projects.return_value = evg_projects
@@ -70,8 +70,11 @@ class TestCli:
                     assert len(output) == 1
                     test_mapping = output[0]
                     expected_test_mapping = expected_test_mappings_output[0]
-                    assert test_mapping['source_file'] == expected_test_mapping['source_file']
-                    assert test_mapping['project'] == expected_test_mapping['project']
-                    assert test_mapping['branch'] == expected_test_mapping['branch']
-                    assert test_mapping['source_file_seen_count'] == expected_test_mapping['source_file_seen_count']
-                    assert test_mapping['test_files'] == expected_test_mapping['test_files']
+                    assert test_mapping["source_file"] == expected_test_mapping["source_file"]
+                    assert test_mapping["project"] == expected_test_mapping["project"]
+                    assert test_mapping["branch"] == expected_test_mapping["branch"]
+                    assert (
+                        test_mapping["source_file_seen_count"]
+                        == expected_test_mapping["source_file_seen_count"]
+                    )
+                    assert test_mapping["test_files"] == expected_test_mapping["test_files"]

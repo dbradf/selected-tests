@@ -99,11 +99,7 @@ def cli(ctx, verbose: str):
     help="Regex that will be used to map what module files mappings will be created. "
     "Example: 'src.*'",
 )
-@click.option(
-    "--module-test-file-regex",
-    type=str,
-    help="Regex to match test files in module."
-)
+@click.option("--module-test-file-regex", type=str, help="Regex to match test files in module.")
 @click.option(
     "--output-file",
     type=str,
@@ -141,13 +137,7 @@ def create(
         source_re = re.compile(source_file_regex)
         test_re = re.compile(test_file_regex)
         project_test_mappings = TestMappings.create_mappings(
-            project_repo,
-            test_re,
-            source_re,
-            start_date,
-            end_date,
-            evergreen_project,
-            branch,
+            project_repo, test_re, source_re, start_date, end_date, evergreen_project, branch
         )
         project_test_mappings_list = project_test_mappings.get_mappings()
 
