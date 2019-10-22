@@ -1,7 +1,6 @@
 from unittest.mock import MagicMock, patch
 from datetime import datetime, date, time
 import re
-import pdb
 from copy import deepcopy
 
 from selectedtests.task_mappings import mappings as under_test

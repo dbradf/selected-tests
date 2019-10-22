@@ -1,12 +1,10 @@
-from collections import defaultdict
+import structlog
+import os.path
 
 from datetime import datetime
-import structlog
+from collections import defaultdict
 from structlog.stdlib import LoggerFactory
-import pdb
 from selectedtests.git_helper import modified_files_for_commit
-import os.path
-from typing import List, Set
 from re import Pattern
 from git import Repo
 

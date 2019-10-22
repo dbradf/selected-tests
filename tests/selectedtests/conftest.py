@@ -1,7 +1,6 @@
 import git
 import json
 import os
-import pdb
 import pytest
 
 from unittest.mock import MagicMock

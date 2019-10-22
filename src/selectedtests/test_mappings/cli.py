@@ -1,19 +1,14 @@
 """Cli entry point for the test-mappings command."""
 import json
 import logging
-import pdb
 import re
 import tempfile
-
-from datetime import datetime, time
-from typing import Dict
-
 import click
 import structlog
 
+from datetime import datetime
+from typing import Dict
 from evergreen.api import CachedEvergreenApi
-from evergreen.version import Version
-
 from selectedtests.test_mappings.mappings import TestMappings
 from selectedtests.git_helper import init_repo
 
