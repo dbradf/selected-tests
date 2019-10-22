@@ -3,7 +3,6 @@ import json
 import os
 import pdb
 import pytest
-import shutil
 
 from unittest.mock import MagicMock
 from typing import List, Dict
@@ -117,97 +116,87 @@ def initialize_temp_repo(directory):
     return repo
 
 
-def destroy_temp_repo(directory):
-    shutil.rmtree(directory)
-
-
 @pytest.fixture(scope="module")
 def repo_with_no_source_files_changed():
-    temp_directory = os.path.join(CURRENT_DIRECTORY, "no_source_files_changed")
-    repo = initialize_temp_repo(temp_directory)
-    yield repo
+    def _repo(temp_directory):
+        repo = initialize_temp_repo(temp_directory)
+        return repo
 
-    destroy_temp_repo(temp_directory)
+    return _repo
 
 
 @pytest.fixture(scope="module")
 def repo_with_one_source_file_and_no_test_files_changed():
-    temp_directory = os.path.join(CURRENT_DIRECTORY, "one_source_file_and_no_test_files_changed")
-    repo = initialize_temp_repo(temp_directory)
-    source_file = os.path.join(temp_directory, "new-source-file")
-    open(source_file, "wb").close()
-    repo.index.add([source_file])
-    repo.index.commit("add source file")
-    yield repo
+    def _repo(temp_directory):
+        repo = initialize_temp_repo(temp_directory)
+        source_file = os.path.join(temp_directory, "new-source-file")
+        open(source_file, "wb").close()
+        repo.index.add([source_file])
+        repo.index.commit("add source file")
+        return repo
 
-    destroy_temp_repo(temp_directory)
+    return _repo
 
 
 @pytest.fixture(scope="module")
 def repo_with_no_source_files_and_one_test_file_changed():
-    temp_directory = os.path.join(CURRENT_DIRECTORY, "no_source_files_and_one_test_file_changed")
-    repo = initialize_temp_repo(temp_directory)
-    test_file = os.path.join(temp_directory, "new-test-file")
-    open(test_file, "wb").close()
-    repo.index.add([test_file])
-    repo.index.commit("add test file")
-    yield repo
+    def _repo(temp_directory):
+        repo = initialize_temp_repo(temp_directory)
+        test_file = os.path.join(temp_directory, "new-test-file")
+        open(test_file, "wb").close()
+        repo.index.add([test_file])
+        repo.index.commit("add test file")
+        return repo
 
-    destroy_temp_repo(temp_directory)
+    return _repo
 
 
 @pytest.fixture(scope="module")
 def repo_with_one_source_file_and_one_test_file_changed_in_same_commit():
-    temp_directory = os.path.join(
-        CURRENT_DIRECTORY, "one_source_file_and_one_test_file_changed_in_same_commit"
-    )
-    repo = initialize_temp_repo(temp_directory)
-    source_file = os.path.join(temp_directory, "new-source-file")
-    test_file = os.path.join(temp_directory, "new-test-file")
-    open(source_file, "wb").close()
-    open(test_file, "wb").close()
-    repo.index.add([source_file, test_file])
-    repo.index.commit("add source and test file in same commit")
-    yield repo
+    def _repo(temp_directory):
+        repo = initialize_temp_repo(temp_directory)
+        source_file = os.path.join(temp_directory, "new-source-file")
+        test_file = os.path.join(temp_directory, "new-test-file")
+        open(source_file, "wb").close()
+        open(test_file, "wb").close()
+        repo.index.add([source_file, test_file])
+        repo.index.commit("add source and test file in same commit")
+        return repo
 
-    destroy_temp_repo(temp_directory)
+    return _repo
 
 
 @pytest.fixture(scope="module")
 def repo_with_one_source_file_and_one_test_file_changed_in_different_commits():
-    temp_directory = os.path.join(
-        CURRENT_DIRECTORY, "one_source_file_and_one_test_file_changed_in_different_commits"
-    )
-    repo = initialize_temp_repo(temp_directory)
-    source_file = os.path.join(temp_directory, "new-source-file")
-    open(source_file, "wb").close()
-    repo.index.add([source_file])
-    repo.index.commit("add source file")
-    test_file = os.path.join(temp_directory, "new-test-file")
-    open(test_file, "wb").close()
-    repo.index.add([test_file])
-    repo.index.commit("add test file")
-    yield repo
+    def _repo(temp_directory):
+        repo = initialize_temp_repo(temp_directory)
+        source_file = os.path.join(temp_directory, "new-source-file")
+        open(source_file, "wb").close()
+        repo.index.add([source_file])
+        repo.index.commit("add source file")
+        test_file = os.path.join(temp_directory, "new-test-file")
+        open(test_file, "wb").close()
+        repo.index.add([test_file])
+        repo.index.commit("add test file")
+        return repo
 
-    destroy_temp_repo(temp_directory)
+    return _repo
 
 
 @pytest.fixture(scope="module")
 def repo_with_files_added_two_days_ago():
-    two_days_ago = str(datetime.combine(datetime.now() - timedelta(days=2), time()))
-    os.environ["GIT_AUTHOR_DATE"] = two_days_ago
-    os.environ["GIT_COMMITTER_DATE"] = two_days_ago
+    def _repo(temp_directory):
+        two_days_ago = str(datetime.combine(datetime.now() - timedelta(days=2), time()))
+        os.environ["GIT_AUTHOR_DATE"] = two_days_ago
+        os.environ["GIT_COMMITTER_DATE"] = two_days_ago
 
-    temp_directory = os.path.join(
-        CURRENT_DIRECTORY, "one_source_file_and_one_test_file_changed_in_same_commit_two_days_ago"
-    )
-    repo = initialize_temp_repo(temp_directory)
-    source_file = os.path.join(temp_directory, "new-source-file")
-    test_file = os.path.join(temp_directory, "new-test-file")
-    open(source_file, "wb").close()
-    open(test_file, "wb").close()
-    repo.index.add([source_file, test_file])
-    repo.index.commit("add source and test file in same commit")
-    yield repo
+        repo = initialize_temp_repo(temp_directory)
+        source_file = os.path.join(temp_directory, "new-source-file")
+        test_file = os.path.join(temp_directory, "new-test-file")
+        open(source_file, "wb").close()
+        open(test_file, "wb").close()
+        repo.index.add([source_file, test_file])
+        repo.index.commit("add source and test file in same commit")
+        return repo
 
-    destroy_temp_repo(temp_directory)
+    return _repo

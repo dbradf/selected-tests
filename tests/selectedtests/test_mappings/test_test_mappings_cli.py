@@ -71,8 +71,8 @@ class TestCli:
 
         runner = CliRunner()
         with runner.isolated_filesystem():
-            with tempfile.TemporaryDirectory() as tmpdirname:
-                init_repo_mock.return_value = lydia_repo(tmpdirname)
+            with tempfile.TemporaryDirectory() as tmpdir:
+                init_repo_mock.return_value = lydia_repo(tmpdir)
                 output_file = "output.txt"
                 result = runner.invoke(
                     cli,
