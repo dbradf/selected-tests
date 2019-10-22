@@ -1,0 +1,8 @@
+image:
+  tag: git-${DRONE_COMMIT_SHA:0:7}
+  repository: 795250896452.dkr.ecr.us-east-1.amazonaws.com/server-tig/${DRONE_REPO_NAME}
+
+ingress:
+  enabled: true
+  hosts:
+    - selected-tests.server-tig.prod.corp.mongodb.com

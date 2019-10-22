@@ -1,0 +1,19 @@
+image:
+  tag: git-${DRONE_COMMIT_SHA:0:7}
+  repository: 795250896452.dkr.ecr.us-east-1.amazonaws.com/server-tig/${DRONE_REPO_NAME}
+
+ingress:
+  enabled: true
+  hosts:
+    - selected-tests.server-tig.staging.corp.mongodb.com
+
+prometheusRules:
+  - alert: HTTPStatusCodesShowServiceUnhealthy
+    expr: sum(increase(traefik_backend_requests_total{backend="selected-tests.server-tig.staging.corp.mongodb.com/", code!="200", code!="201", code!="204"}[1h])) > 1
+    for: 5m
+    labels:
+      severity: warning
+      email_to: jeff.zambory@mongodb.com
+    annotations:
+      description: Test alert firing
+      summary: Test alert firing
