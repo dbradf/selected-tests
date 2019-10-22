@@ -196,7 +196,7 @@ def repo_with_files_added_two_days_ago():
         open(source_file, "wb").close()
         open(test_file, "wb").close()
         repo.index.add([source_file, test_file])
-        repo.index.commit("add source and test file in same commit")
+        repo.index.commit("add source and test file in same commit 2 days ago")
         return repo
 
     return _repo

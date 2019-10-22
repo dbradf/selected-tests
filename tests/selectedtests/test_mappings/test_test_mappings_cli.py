@@ -32,20 +32,20 @@ class TestCli:
         evg_projects,
         evg_versions,
         expected_test_mappings_output,
-        repo_with_one_source_file_and_one_test_file_changed_in_same_commit
+        repo_with_files_added_two_days_ago
     ):
         mock_evg_api = MagicMock()
         mock_evg_api.all_projects.return_value = evg_projects
         mock_evg_api.versions_by_project.return_value = evg_versions
         cached_evg_api.get_api.return_value = mock_evg_api
 
-        one_day_ago = datetime.combine(datetime.now() - timedelta(days=1), time())
-        one_day_from_now = datetime.combine(datetime.now() + timedelta(days=1), time())
+        three_days_ago = datetime.combine(datetime.now() - timedelta(days=3), time())
+        two_days_ago = datetime.combine(datetime.now() - timedelta(days=2), time())
 
         runner = CliRunner()
         with runner.isolated_filesystem():
             with tempfile.TemporaryDirectory() as tmpdir:
-                init_repo_mock.return_value = repo_with_one_source_file_and_one_test_file_changed_in_same_commit(tmpdir)
+                init_repo_mock.return_value = repo_with_files_added_two_days_ago(tmpdir)
                 output_file = "output.txt"
                 result = runner.invoke(
                     cli,
@@ -59,9 +59,9 @@ class TestCli:
                         "--output-file",
                         output_file,
                         "--start",
-                        str(one_day_ago),
+                        str(three_days_ago),
                         "--end",
-                        str(one_day_from_now),
+                        str(two_days_ago),
                     ],
                 )
                 assert result.exit_code == 0

@@ -110,39 +110,39 @@ class TestTestMappings:
             test_mappings_list = test_mappings.get_mappings()
             assert len(test_mappings_list) == 0
 
-    #  def test_date_range_includes_time_of_file_changes(self, repo_with_files_added_two_days_ago):
-        #  with tempfile.TemporaryDirectory() as tmpdir:
-            #  repo = repo_with_files_added_two_days_ago(tmpdir)
-            #  three_days_ago = datetime.combine(datetime.now() - timedelta(days=3), time())
-            #  two_days_ago = datetime.combine(datetime.now() - timedelta(days=2), time())
-            #  test_mappings = under_test.TestMappings.create_mappings(
-                #  repo,
-                #  TEST_RE,
-                #  SOURCE_RE,
-                #  three_days_ago,
-                #  two_days_ago,
-                #  PROJECT,
-                #  BRANCH,
-            #  )
-            #  test_mappings_list = test_mappings.get_mappings()
+    def test_date_range_includes_time_of_file_changes(self, repo_with_files_added_two_days_ago):
+        with tempfile.TemporaryDirectory() as tmpdir:
+            repo = repo_with_files_added_two_days_ago(tmpdir)
+            three_days_ago = datetime.combine(datetime.now() - timedelta(days=3), time())
+            two_days_ago = datetime.combine(datetime.now() - timedelta(days=2), time())
+            test_mappings = under_test.TestMappings.create_mappings(
+                repo,
+                TEST_RE,
+                SOURCE_RE,
+                three_days_ago,
+                two_days_ago,
+                PROJECT,
+                BRANCH,
+            )
+            test_mappings_list = test_mappings.get_mappings()
 
-            #  source_file_test_mapping = test_mappings_list[0]
-            #  assert source_file_test_mapping["source_file"] == "new-source-file"
-            #  for test_file_mapping in source_file_test_mapping["test_files"]:
-                #  assert test_file_mapping["name"] == "new-test-file"
-                #  assert test_file_mapping["test_file_seen_count"] == 1
+            source_file_test_mapping = test_mappings_list[0]
+            assert source_file_test_mapping["source_file"] == "new-source-file"
+            for test_file_mapping in source_file_test_mapping["test_files"]:
+                assert test_file_mapping["name"] == "new-test-file"
+                assert test_file_mapping["test_file_seen_count"] == 1
 
-    #  def test_date_range_excludes_time_of_file_changes(self, repo_with_files_added_two_days_ago):
-        #  with tempfile.TemporaryDirectory() as tmpdir:
-            #  repo = repo_with_files_added_two_days_ago(tmpdir)
-            #  test_mappings = under_test.TestMappings.create_mappings(
-                #  repo,
-                #  TEST_RE,
-                #  SOURCE_RE,
-                #  ONE_DAY_AGO,
-                #  ONE_DAY_FROM_NOW,
-                #  PROJECT,
-                #  BRANCH,
-            #  )
-            #  test_mappings_list = test_mappings.get_mappings()
-            #  assert len(test_mappings_list) == 0
+    def test_date_range_excludes_time_of_file_changes(self, repo_with_files_added_two_days_ago):
+        with tempfile.TemporaryDirectory() as tmpdir:
+            repo = repo_with_files_added_two_days_ago(tmpdir)
+            test_mappings = under_test.TestMappings.create_mappings(
+                repo,
+                TEST_RE,
+                SOURCE_RE,
+                ONE_DAY_AGO,
+                ONE_DAY_FROM_NOW,
+                PROJECT,
+                BRANCH,
+            )
+            test_mappings_list = test_mappings.get_mappings()
+            assert len(test_mappings_list) == 0
