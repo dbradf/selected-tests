@@ -1,10 +1,6 @@
 import json
-import pdb
-import pytest
 import os
 import tempfile
-import git
-import shutil
 
 from click.testing import CliRunner
 from unittest.mock import patch, MagicMock
@@ -26,29 +22,6 @@ def m_ns(relative_name):
     return MAPPINGS_NS + "." + relative_name
 
 
-def initialize_temp_repo(directory):
-    repo = git.Repo.init(directory)
-    repo.index.commit("initial commit -- no files changed")
-    return repo
-
-
-@pytest.fixture(scope="module")
-def lydia_repo():
-    def _repo(temp_directory):
-        repo = initialize_temp_repo(temp_directory)
-        source_file = os.path.join(temp_directory, "new-source-file")
-        test_file = os.path.join(temp_directory, "new-test-file")
-        open(source_file, "wb").close()
-        open(test_file, "wb").close()
-        # os.listdir("temp")
-        # ['new-source-file', 'new-test-file', '.git']
-        repo.index.add([source_file, test_file])
-        repo.index.commit("add source and test file in same commit")
-        return repo
-
-    return _repo
-
-
 class TestCli:
     @patch(ns("CachedEvergreenApi"))
     @patch(ns("init_repo"))
@@ -59,7 +32,7 @@ class TestCli:
         evg_projects,
         evg_versions,
         expected_test_mappings_output,
-        lydia_repo,
+        repo_with_one_source_file_and_one_test_file_changed_in_same_commit
     ):
         mock_evg_api = MagicMock()
         mock_evg_api.all_projects.return_value = evg_projects
@@ -72,7 +45,7 @@ class TestCli:
         runner = CliRunner()
         with runner.isolated_filesystem():
             with tempfile.TemporaryDirectory() as tmpdir:
-                init_repo_mock.return_value = lydia_repo(tmpdir)
+                init_repo_mock.return_value = repo_with_one_source_file_and_one_test_file_changed_in_same_commit(tmpdir)
                 output_file = "output.txt"
                 result = runner.invoke(
                     cli,
