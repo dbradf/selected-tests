@@ -1,3 +1,4 @@
+"""Test Mappings class to create test mappings."""
 import structlog
 import os.path
 
@@ -13,6 +14,8 @@ LOGGER = structlog.get_logger(__name__)
 
 
 class TestMappings(object):
+    """Represents and creates the test mappings for an evergreen project."""
+
     def __init__(
         self,
         file_intersection: defaultdict,
@@ -38,13 +41,25 @@ class TestMappings(object):
     def create_mappings(
         cls,
         repo: Repo,
-        test_re: Pattern,
         source_re: Pattern,
+        test_re: Pattern,
         start_date: datetime,
         end_date: datetime,
         project: str,
         branch: str,
     ):
+        """
+        Create the test mappings for an evergreen project. Optionally looks at an associated module.
+
+        :param repo: The repo that contains the source code for the evergreen project.
+        :param source_re: Regex pattern to match changed source files against.
+        :param test_re: Regex pattern to match changed test files against.
+        :param start_date: The date at which to start analyzing commits of the project.
+        :param end_date: The date up to which we should analyze commits of the project.
+        :param project: The name of the evergreen project to analyze.
+        :param branch: The branch of the git repo used for the evergreen project.
+        :return: An instance of the test mappings class
+        """
         file_intersection = defaultdict(lambda: defaultdict(int))
         file_count = defaultdict(int)
 
@@ -83,6 +98,11 @@ class TestMappings(object):
         return TestMappings(file_intersection, file_count, project, repo_name, branch)
 
     def get_mappings(self):
+        """
+        Get a transformed version of test mappings to the test mapping object.
+
+        :return: Transformed test mappings
+        """
         if not self._test_mappings:
             self._test_mappings = self._transform_mappings()
         return self._test_mappings

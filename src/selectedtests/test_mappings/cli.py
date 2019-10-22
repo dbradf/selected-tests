@@ -18,6 +18,14 @@ EXTERNAL_LIBRARIES = ["evergreen.api", "urllib3"]
 
 
 def _get_module_info(evg_api: CachedEvergreenApi, project: str, module_repo: str):
+    """
+    Fetch the module associated with an Evergreen project.
+
+    :param evg_api: An instance of the evg_api client
+    :param project: The name of the evergreen project to analyze.
+    :param module_name: Name of the module to analyze
+    :return: Information about the evergreen module
+    """
     version_iterator = evg_api.versions_by_project(project)
     recent_version = next(version_iterator)
     modules = recent_version.get_manifest().modules
@@ -30,6 +38,13 @@ def _get_module_info(evg_api: CachedEvergreenApi, project: str, module_repo: str
 
 
 def _get_evg_project(evg_api: CachedEvergreenApi, project: str) -> Dict:
+    """
+    Fetch an Evergreen project's info from the Evergreen API.
+
+    :param evg_api: An instance of the evg_api client
+    :param project: The name of the evergreen project to analyze.
+    :return: evg_api client instance of the project
+    """
     for evergreen_project in evg_api.all_projects():
         if evergreen_project.identifier == project:
             return evergreen_project
@@ -37,7 +52,7 @@ def _get_evg_project(evg_api: CachedEvergreenApi, project: str) -> Dict:
 
 
 def _setup_logging(verbose: bool):
-    """Setup logging configuration"""
+    """Set up logging configuration."""
     structlog.configure(logger_factory=structlog.stdlib.LoggerFactory())
     level = logging.DEBUG if verbose else logging.INFO
     logging.basicConfig(level=level)
@@ -112,6 +127,7 @@ def create(
     module_test_file_regex: str,
     output_file: str,
 ):
+    """Create the test mappings for a given evergreen project."""
     evg_api = ctx.obj["evg_api"]
 
     try:
@@ -132,7 +148,7 @@ def create(
         source_re = re.compile(source_file_regex)
         test_re = re.compile(test_file_regex)
         project_test_mappings = TestMappings.create_mappings(
-            project_repo, test_re, source_re, start_date, end_date, evergreen_project, branch
+            project_repo, source_re, test_re, start_date, end_date, evergreen_project, branch
         )
         project_test_mappings_list = project_test_mappings.get_mappings()
 
