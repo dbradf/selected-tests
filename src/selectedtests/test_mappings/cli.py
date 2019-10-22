@@ -26,13 +26,12 @@ def _get_module_info(evg_api: CachedEvergreenApi, project: str, module_repo: str
     version_iterator = evg_api.versions_by_project(project)
     recent_version = next(version_iterator)
     modules = recent_version.get_manifest().modules
-    for module in modules:
-        if modules[module].repo == module_repo:
-            return {
-                "module_owner": modules[module].owner,
-                "module_repo": modules[module].repo,
-                "module_branch": modules[module].branch,
-            }
+    module = modules.get(module_repo)
+    return {
+        "module_owner": module.owner,
+        "module_repo": module.repo,
+        "module_branch": module.branch,
+    }
 
 
 def _get_evg_project(evg_api: CachedEvergreenApi, project: str) -> Dict:

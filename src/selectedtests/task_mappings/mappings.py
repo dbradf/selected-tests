@@ -141,8 +141,8 @@ def _get_filtered_files(diff: DiffIndex, regex: Pattern) -> List[str]:
     """
     re: List[str] = []
     for file in get_changed_files(diff, LOGGER):
-        if match(regex, file.b_path):
-            re.append(file.b_path)
+        if match(regex, file):
+            re.append(file)
     return re
 
 

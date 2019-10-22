@@ -259,8 +259,7 @@ class TestFilteredFiles:
     @patch(ns("get_changed_files"))
     def test_filter_files_by_regex(self, changed_files_mock):
         def changed_files(diff, logger):
-            letters = ["a", "b", "c", "ab", "ac", "ba", "bc", "ca", "cb", "abc/test"]
-            return [MagicMock(b_path=l) for l in letters]
+            return ["a", "b", "c", "ab", "ac", "ba", "bc", "ca", "cb", "abc/test"]
 
         changed_files_mock.side_effect = changed_files
 
